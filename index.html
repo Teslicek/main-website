@@ -542,7 +542,7 @@
 
           <nav class="nav-links">
             <a href="#top" class="active">Home</a>
-            <a href="#join" id="howto-link">How To Join</a>
+            <a href="./realm/">Realm</a>
             <a href="./vote/">Vote</a>
             <a href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer">Discord</a>
           </nav>
@@ -916,7 +916,7 @@
         const brand = document.getElementById("brand-link");
         const onlinePill = document.getElementById("online-pill");
 
-        [howto, brand, onlinePill].forEach((el) => {
+        [brand, onlinePill].forEach((el) => {
           if (!el) return;
           el.addEventListener("click", (e) => {
             e.preventDefault();
