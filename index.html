@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en" id="top">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LifeSteal SMP</title>
+
+    <meta
+      name="description"
+      content="Competitive LifeSteal Minecraft SMP. Steal hearts on kill, raid bases, form alliances, and climb the leaderboard. Java + Bedrock."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://lifestealsmp.com/" />
+    <link rel="icon" href="./favicon.ico" sizes="any" />
+
+    <!-- Minecraftia font (ONLY for server ip + realm code) -->
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraftia" />
+
+    <style>
+      :root {
+        --bg: #0c0c0c;
+        --surface: #151515;
+        --surface-light: #1c1c1c;
+
+        --text: #ffffff;
+        --muted: #b3b3b3;
+
+        --accent: #ff2e2e;
+        --accentHover: #ff4d4d;
+
+        --border: #242424;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans,
+          "Apple Color Emoji", "Segoe UI Emoji";
+      }
+
+      a { color: inherit; text-decoration: none; }
+
+      header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 16px; /* slightly tighter */
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        column-gap: 14px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .logo {
+        width: 34px;
+        height: 34px;
+        object-fit: contain;
+        flex: 0 0 auto;
+      }
+
+      /* ---- Brand text: keep it tight so navbar doesn't get fat ---- */
+      .brandtext {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.05;
+        gap: 1px;            /* tighter */
+        min-width: 0;
+        align-items: flex-start;
+        text-align: left;
+        width: max-content;
+      }
+      .brandtitle {
+        font-weight: 750;
+        letter-spacing: -0.03em;
+        white-space: nowrap;
+        width: max-content;
+      }
+      .brandsub {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--muted);
+        margin-top: -2px;    /* pull closer to title */
+        white-space: nowrap;
+        width: 100%;
+      }
+
+      /* ---- Pills ---- */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--surface-light);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      #online-pill { gap: 6px; }
+
+      /* 2-line pill content container */
+      .pill-text {
+        display: grid;
+        grid-auto-rows: min-content;
+        justify-items: center;  /* centers both lines */
+        row-gap: 2px;
+        line-height: 1.05;
+      }
+
+      /* top line = green dot + count as one unit */
+      .pill-topline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+        min-width: 88px; /* dot + space + "999 online" */
+      }
+
+      /* bottom line NOT bold */
+      .pill-sub {
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--text);
+        opacity: 0.92;
+      }
+
+      #online-pill .pill-sub, #discord-pill .pill-sub { font-weight: 700; }
+
+      /* Online dot */
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #6b6b6b;
+        flex: 0 0 auto;
+      }
+      #online-pill[data-state="online"] .status-dot { background: #22c55e; }
+      #online-pill[data-state="offline"] .status-dot { background: #ef4444; }
+      #online-pill[data-state="unknown"] .status-dot { background: #6b6b6b; }
+
+      /* Prevent center nav jitter: reserve width for playercount text ONLY */
+      #playercount {
+        display: inline-block;
+        text-align: left;
+      }
+
+      /* Pixel controller icon (crisp) */
+      .pixel-icon {
+        width: 18px;
+        height: 18px;
+        display: block;
+        flex: 0 0 auto;
+        color: var(--muted);
+      }
+      .pill:hover .pixel-icon { color: var(--text); }
+
+      .discord-icon {
+        width: 18px;
+        height: 18px;
+        display: block;
+        flex: 0 0 auto;
+        color: var(--muted);
+      }
+      .pill:hover .discord-icon { color: var(--text); }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .nav-links a {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .nav-links a:hover { color: var(--text); }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      @media (max-width: 820px) {
+        .nav-links { display: none; }
+        .topbar { grid-template-columns: 1fr auto; }
+        .nav-right .pill { display: none; }
+        .nav-right .btn { display: inline-flex; }
+        .brandsub { display: none; }
+
+        #online-pill { display: inline-flex; padding: 6px 8px; gap: 8px; }
+        #online-pill .pill-sub { display: none; }
+        #playercount { min-width: 0; }
+      }
+
+      /* --- HERO VIDEO --- */
+      .hero {
+        position: relative;
+        height: 40vh;
+        min-height: 260px;
+        overflow: hidden;
+        background: #000;
+        border-top: 1px solid rgba(255,255,255,0.25);
+        border-bottom: 1px solid rgba(255,255,255,0.25);
+      }
+
+      .hero video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.85) contrast(1.05) saturate(1.05);
+      }
+
+      .hero .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero video { filter: none; }
+      }
+
+      main {
+        margin-top: -140px;
+        padding: 0 0 28px;
+        position: relative;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+
+      @media (min-width: 900px) {
+        .grid { grid-template-columns: 1.15fr 0.85fr; }
+      }
+
+      .card {
+        background: var(--surface);
+        border-radius: 14px;
+        padding: 20px;
+        border: 1px solid var(--border);
+      }
+
+      .stack { display: grid; gap: 14px; }
+
+      h1 {
+        margin: 0;
+        font-size: 46px;
+        line-height: 1.06;
+        letter-spacing: -0.03em;
+        font-weight: 750;
+      }
+
+      @media (min-width: 640px) {
+        h1 { font-size: 58px; }
+      }
+
+      p {
+        margin: 12px 0 0;
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 16px;
+        max-width: 64ch;
+      }
+
+      .actions {
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        padding: 0 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface-light);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .btn:hover { background: #222222; }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+      }
+      .btn-primary:hover { background: var(--accentHover); }
+
+      .btn-white {
+        background: #ffffff;
+        color: #000000;
+        border: none;
+        font-weight: 700;
+      }
+      .btn-white:hover { background: #e6e6e6; }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #ffffff;
+      }
+
+      .h2-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .title-icon {
+        width: 18px;
+        height: 18px;
+        display: block;
+        flex: 0 0 auto;
+      }
+
+      .hint {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .row {
+        margin-top: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: var(--surface-light);
+        border: 1px solid var(--border);
+      }
+
+      .label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* Minecraftia for IP + code, not bold */
+      .mc-font {
+        margin-top: 6px;
+        font-family: "Minecraftia", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 14px;
+        font-weight: 400;
+        color: #ffffff;
+        letter-spacing: 0.02em;
+      }
+
+      .copy {
+        height: 34px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .copy:hover { background: #222222; }
+
+      .note {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* ---- Guide overlay: do NOT darken the join cards area ---- */
+      .guide {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        pointer-events: none;
+        background: rgba(0,0,0,0.88);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 90ms ease;
+      }
+      .guide.show {
+        pointer-events: auto;
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .guide-spotlight {
+        position: relative;
+        z-index: 3002;
+      }
+
+      /* Single left-side instruction block */
+      .guide-text {
+        position: fixed;
+        z-index: 3003;
+        display: none;
+        max-width: 340px;
+        background: rgba(21,21,21,0.92);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--text);
+        font-size: 13px;
+        line-height: 1.45;
+        opacity: 0;
+        transform: translateX(-6px);
+        transition: opacity 90ms ease, transform 90ms ease;
+      }
+      .guide-text.show {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .guide { transition: none; }
+        .guide-text { transition: none; transform: none; }
+      }
+
+      .guide-text .title {
+        font-weight: 800;
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+
+      .guide-arrow {
+        display: inline-block;
+        margin-left: 6px;
+        font-size: 34px;
+        line-height: 1;
+        transform: translateY(4px);
+      }
+
+      .pulse {
+        outline: 2px solid rgba(255,255,255,0.35);
+        outline-offset: 4px;
+        border-radius: 16px;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 0 0 6px rgba(255,46,46,0.08);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="container">
+        <div class="topbar">
+          <a class="brand" href="#top" aria-label="LifeSteal SMP" id="brand-link">
+            <img class="logo" src="./logo.png" alt="LifeSteal SMP" onerror="this.style.display='none'" />
+
+            <span class="brandtext">
+              <span class="brandtitle">LifeSteal SMP</span>
+              <span class="brandsub">Java &amp; Bedrock</span>
+            </span>
+
+            <!-- Player count pill (clickable guide trigger) -->
+            <span class="pill" id="online-pill" data-state="unknown" title="Online players" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="guide-text" aria-expanded="false">
+              <svg
+                class="pixel-icon"
+                viewBox="0 0 512 512"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  fill="currentColor"
+                  d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9V344c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z"
+                />
+              </svg>
+
+
+              <span class="pill-text">
+                <span class="pill-topline">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  <span id="playercount">…</span>
+                </span>
+                <span class="pill-sub">Play Now</span>
+              </span>
+            </span>
+          </a>
+
+          <nav class="nav-links">
+            <a href="#join" id="howto-link">How To Join</a>
+            <a href="https://vote.lifestealsmp.com" target="_blank" rel="noreferrer">Vote</a>
+            <a href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer">Discord</a>
+          </nav>
+
+          <div class="nav-right">
+            <a class="pill" id="discord-pill" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer" title="Discord">
+              <svg
+                class="discord-icon"
+                viewBox="0 0 640 512"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  fill="currentColor"
+                  d="M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6a447.848,447.848,0,0,0-134.426,0a309.541,309.541,0,0,0-15.135-30.6a1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588a321.173,321.173,0,0,1-45.868-21.853a1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126a301.407,301.407,0,0,1-45.89,21.83a1.875,1.875,0,0,0-1,2.611a391.055,391.055,0,0,0,30.014,48.815a1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z"
+                />
+              </svg>
+
+              <span class="pill-text">
+                <span id="discordcount">…</span>
+                <span class="pill-sub">Join Discord</span>
+              </span>
+            </a>
+
+            <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer">Store</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero" aria-label="Background video">
+      <video autoplay muted loop playsinline preload="none" data-src="./bg.mp4"></video>
+      <div class="hero-overlay" aria-hidden="true"></div>
+    </section>
+
+    <main>
+      <div class="container">
+        <div class="grid">
+          <section class="card">
+            <h1>LifeSteal SMP</h1>
+            <p>
+              Fast, high-stakes Minecraft survival. Kill players to steal their hearts, form alliances, raid bases, and climb to the top.
+            </p>
+            <p>Supports both Java and Bedrock players, with regular events and competitive PvP.</p>
+
+            <div class="actions">
+              <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer">Store</a>
+              <a class="btn" href="https://vote.lifestealsmp.com" target="_blank" rel="noreferrer">Vote</a>
+              <a class="btn" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer">Discord</a>
+            </div>
+          </section>
+
+          <section class="stack" id="join">
+            <div class="card" id="java-card">
+              <h2 class="h2-icon">
+                <img class="title-icon" src="./java-logo.png" alt="Java" loading="lazy" decoding="async" />
+                <span>Java Edition</span>
+              </h2>
+              <div class="hint">Multiplayer → Add Server:</div>
+
+              <div class="row">
+                <div>
+                  <div class="label">Server IP</div>
+                  <div class="mc-font" id="java-ip">lifestealsmp.com</div>
+                </div>
+                <button class="copy" type="button" data-copy="java-ip">Copy</button>
+              </div>
+            </div>
+
+            <div class="card" id="bedrock-card">
+              <h2 class="h2-icon">
+                <img class="title-icon" src="./bedrock-logo.png" alt="Bedrock" loading="lazy" decoding="async" />
+                <span>Bedrock Edition</span>
+              </h2>
+              <div class="hint">Realms → Add/join Realm → Join an existing Realm:</div>
+
+              <div class="row">
+                <div>
+                  <div class="label">Realm Code</div>
+                  <div class="mc-font" id="bedrock-code">4TmLrnUtSXVXj2Q</div>
+                </div>
+                <button class="copy" type="button" data-copy="bedrock-code">Copy</button>
+              </div>
+
+              <button class="btn btn-white" style="margin-top: 12px; width: 100%;" type="button" id="join-bedrock">
+                Join Bedrock Realm
+              </button>
+
+              <div class="note">Click to automatically join the server on Bedrock Edition.</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <div class="guide" id="guide" aria-hidden="true"></div>
+
+    <div class="guide-text" id="guide-text" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1">
+      <div class="title">Join here <span class="guide-arrow">→</span></div>
+      <div style="opacity:0.95">Java:</div>
+      <div style="opacity:0.9">Copy the IP and add it in Multiplayer.</div>
+      <div style="height:8px"></div>
+      <div style="opacity:0.95">Bedrock:</div>
+      <div style="opacity:0.9">Copy the Realm Code (or click Join Realm).</div>
+    </div>
+
+    <script>
+      async function loadPlayerCount() {
+        const pill = document.getElementById("online-pill");
+        const el = document.getElementById("playercount");
+
+        try {
+          const res = await fetch("https://api.mcsrvstat.us/2/lifestealsmp.com", { cache: "no-store" });
+          const data = await res.json();
+
+          if (data && data.online && data.players && typeof data.players.online === "number") {
+            pill.dataset.state = "online";
+            el.textContent = data.players.online + " online";
+          } else {
+            pill.dataset.state = "offline";
+            el.textContent = "Offline";
+          }
+        } catch {
+          pill.dataset.state = "unknown";
+          el.textContent = "Unavailable";
+        }
+      }
+
+      async function loadDiscordMembers() {
+        const el = document.getElementById("discordcount");
+
+        try {
+          const res = await fetch("https://discord.com/api/v9/invites/lifestealsmp?with_counts=true", { cache: "no-store" });
+          const data = await res.json();
+
+          if (data && typeof data.approximate_member_count === "number") {
+            el.textContent = data.approximate_member_count.toLocaleString() + " members";
+          } else {
+            el.textContent = "Discord";
+          }
+        } catch {
+          el.textContent = "Discord";
+        }
+      }
+
+      loadPlayerCount();
+      loadDiscordMembers();
+
+      function deferHeroVideo() {
+        const video = document.querySelector(".hero video");
+        if (!video) return;
+        const src = video.getAttribute("data-src");
+        if (!src) return;
+        if (video.querySelector("source")) return;
+
+        const source = document.createElement("source");
+        source.src = src;
+        source.type = "video/mp4";
+        video.appendChild(source);
+        video.load();
+
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {});
+        }
+      }
+
+      function scheduleDeferHeroVideo() {
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(deferHeroVideo, { timeout: 2000 });
+        } else {
+          setTimeout(deferHeroVideo, 600);
+        }
+      }
+
+      window.addEventListener("load", scheduleDeferHeroVideo);
+
+      (function () {
+        function fitBrandSubtitle() {
+          const title = document.querySelector(".brandtitle");
+          const sub = document.querySelector(".brandsub");
+          if (!title || !sub) return;
+
+          // Reset first so measurements are accurate
+          sub.style.letterSpacing = "0px";
+
+          const titleW = title.getBoundingClientRect().width;
+          const subW = sub.getBoundingClientRect().width;
+          if (!titleW || !subW) return;
+
+          const text = (sub.textContent || "").trim();
+          const gaps = Math.max(1, text.length - 1);
+          const delta = titleW - subW;
+
+          // Convert width difference into per-character spacing
+          let ls = delta / gaps;
+
+          // Keep it looking natural
+          if (ls > 2) ls = 2;
+          if (ls < -0.5) ls = -0.5;
+
+          sub.style.letterSpacing = ls.toFixed(3) + "px";
+        }
+
+        function scheduleFitBrandSubtitle() {
+          requestAnimationFrame(fitBrandSubtitle);
+        }
+
+        function copy(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); } catch (_) {}
+          document.body.removeChild(ta);
+          return Promise.resolve();
+        }
+
+        document.querySelectorAll("button[data-copy]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const el = document.getElementById(btn.dataset.copy);
+            if (!el) return;
+            copy(el.textContent || "");
+            btn.textContent = "Copied";
+            setTimeout(() => (btn.textContent = "Copy"), 1200);
+          });
+        });
+
+        const inviteId = "4TmLrnUtSXVXj2Q";
+        const joinBtn = document.getElementById("join-bedrock");
+        if (joinBtn) {
+          joinBtn.addEventListener("click", () => {
+            location.href = "minecraft://acceptRealmInvite?inviteID=" + inviteId;
+          });
+        }
+
+        // ---- Guide overlay: darken everything except join cards ----
+        const guide = document.getElementById("guide");
+        const guideText = document.getElementById("guide-text");
+
+        const javaCard = document.getElementById("java-card");
+        const bedrockCard = document.getElementById("bedrock-card");
+        const joinSection = document.getElementById("join");
+
+        function layoutGuideText() {
+          const r = joinSection.getBoundingClientRect();
+
+          const gap = 14;
+          const topY = Math.max(80, r.top + 18);
+          guideText.style.top = topY + "px";
+
+          const w = guideText.getBoundingClientRect().width;
+          const leftCandidate = r.left - w - gap;
+          const rightCandidate = r.right + gap;
+
+          if (leftCandidate >= 12) {
+            guideText.style.left = leftCandidate + "px";
+          } else {
+            guideText.style.left = Math.min(window.innerWidth - w - 12, rightCandidate) + "px";
+          }
+        }
+
+        function showGuide() {
+          joinSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+          setTimeout(() => {
+            guide.classList.add("show");
+            guide.setAttribute("aria-hidden", "false");
+            guideText.classList.add("show");
+            guideText.setAttribute("aria-hidden", "false");
+            onlinePill.setAttribute("aria-expanded", "true");
+            joinSection.classList.add("guide-spotlight");
+            if (javaCard) javaCard.classList.add("guide-spotlight");
+            if (bedrockCard) bedrockCard.classList.add("guide-spotlight");
+            layoutGuideText();
+            guideText.focus({ preventScroll: true });
+          }, 10);
+        }
+
+        function hideGuide() {
+          guide.classList.remove("show");
+          guide.setAttribute("aria-hidden", "true");
+          guideText.classList.remove("show");
+          guideText.setAttribute("aria-hidden", "true");
+          onlinePill.setAttribute("aria-expanded", "false");
+
+          joinSection.classList.remove("guide-spotlight");
+          if (javaCard) javaCard.classList.remove("guide-spotlight");
+          if (bedrockCard) bedrockCard.classList.remove("guide-spotlight");
+
+          onlinePill.focus({ preventScroll: true });
+        }
+
+        guide.addEventListener("click", hideGuide);
+
+        window.addEventListener("resize", () => {
+          if (!guide.classList.contains("show")) return;
+          layoutGuideText();
+        });
+
+        window.addEventListener("scroll", () => {
+          if (!guide.classList.contains("show")) return;
+          layoutGuideText();
+        });
+
+        window.addEventListener("keydown", (e) => {
+          if (e.key !== "Escape") return;
+          if (!guide.classList.contains("show")) return;
+          e.preventDefault();
+          hideGuide();
+        });
+
+        // Trigger guide on clicks
+        const howto = document.getElementById("howto-link");
+        const brand = document.getElementById("brand-link");
+        const onlinePill = document.getElementById("online-pill");
+
+        [howto, brand, onlinePill].forEach((el) => {
+          if (!el) return;
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            showGuide();
+          });
+        });
+
+        onlinePill.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          showGuide();
+        });
+
+        scheduleFitBrandSubtitle();
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(scheduleFitBrandSubtitle);
+        }
+        window.addEventListener("resize", scheduleFitBrandSubtitle);
+      })();
+    </script>
+  </body>
+</html>
