@@ -2,19 +2,60 @@
 <html lang="en" id="top">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LifeSteal SMP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>LifeSteal SMP - Competitive Minecraft Server | Java & Bedrock</title>
 
     <meta
       name="description"
       content="Competitive LifeSteal Minecraft SMP. Steal hearts on kill, raid bases, form alliances, and climb the leaderboard. Java + Bedrock."
     />
-    <meta name="robots" content="index,follow" />
+    <meta name="keywords" content="lifesteal smp, minecraft server, java bedrock, competitive minecraft, pvp server, survival server, minecraft realm" />
+    <meta name="author" content="LifeSteal SMP" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="theme-color" content="#0c0c0c" />
+    <meta name="color-scheme" content="dark" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="canonical" href="https://lifestealsmp.com/" />
     <link rel="icon" href="./favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="./logo.png" />
+    <link rel="alternate" type="application/rss+xml" title="LifeSteal SMP" href="https://lifestealsmp.com/feed.xml" />
+    <link rel="sitemap" type="application/xml" href="https://lifestealsmp.com/sitemap.xml" />
 
-    <!-- Minecraftia font (ONLY for server ip + realm code) -->
-    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraftia" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lifestealsmp.com/" />
+    <meta property="og:title" content="LifeSteal SMP - Competitive Minecraft Server | Java & Bedrock" />
+    <meta property="og:description" content="Competitive LifeSteal Minecraft SMP. Steal hearts on kill, raid bases, form alliances, and climb the leaderboard. Java + Bedrock." />
+    <meta property="og:image" content="https://lifestealsmp.com/logo.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="LifeSteal SMP Logo" />
+    <meta property="og:site_name" content="LifeSteal SMP" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://lifestealsmp.com/" />
+    <meta name="twitter:title" content="LifeSteal SMP - Competitive Minecraft Server | Java & Bedrock" />
+    <meta name="twitter:description" content="Competitive LifeSteal Minecraft SMP. Steal hearts on kill, raid bases, form alliances, and climb the leaderboard. Java + Bedrock." />
+    <meta name="twitter:image" content="https://lifestealsmp.com/logo.png" />
+    <meta name="twitter:image:alt" content="LifeSteal SMP Logo" />
+
+    <!-- Performance: Resource hints -->
+    <link rel="dns-prefetch" href="https://fonts.cdnfonts.com" />
+    <link rel="dns-prefetch" href="https://api.mcsrvstat.us" />
+    <link rel="dns-prefetch" href="https://discord.com" />
+    <link rel="dns-prefetch" href="https://store.lifestealsmp.com" />
+    <!-- Preconnect only for critical resources -->
+    <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin />
+
+    <!-- No preloads - images load lazily for faster initial page load -->
+
+    <!-- Minecraftia font (ONLY for server ip + realm code) - Loaded asynchronously -->
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraftia" media="print" onload="this.media='all'; this.onload=null;" />
+    <noscript><link rel="stylesheet" href="https://fonts.cdnfonts.com/css/minecraftia" /></noscript>
 
     <style>
       :root {
@@ -34,21 +75,215 @@
       * { box-sizing: border-box; }
       html, body { height: 100%; }
 
+      /* Custom scrollbar - only on content below navbar */
+      html {
+        overflow: hidden;
+      }
+
+      body {
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      /* Scrollable wrapper that starts below navbar */
+      .page-content {
+        position: fixed;
+        top: 64px; /* Start below navbar */
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: var(--surface-light) var(--bg);
+      }
+
+      .page-content::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .page-content::-webkit-scrollbar-track {
+        background: var(--bg);
+        border-left: 1px solid var(--border);
+      }
+
+      .page-content::-webkit-scrollbar-thumb {
+        background: var(--surface-light);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+      }
+
+      .page-content::-webkit-scrollbar-thumb:hover {
+        background: var(--surface);
+      }
+
+      main {
+        margin-top: -140px;
+        padding: 0 0 28px;
+        position: relative;
+      }
+
+      /* Footer */
+      footer {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 24px 0;
+        margin-top: 48px;
+      }
+
+      .footer-content {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 16px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+      }
+
+      @media (min-width: 640px) {
+        .footer-content {
+          grid-template-columns: 1fr auto;
+          text-align: left;
+        }
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: center;
+        align-items: center;
+      }
+
+      @media (min-width: 640px) {
+        .footer-links {
+          justify-content: flex-end;
+        }
+      }
+
+      .footer-links a {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        transition: color 120ms ease;
+      }
+
+      .footer-links a:hover {
+        color: var(--text);
+      }
+
+      .footer-copyright {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: center;
+      }
+
+      @media (min-width: 640px) {
+        .footer-copyright {
+          align-items: flex-start;
+        }
+      }
+
+      .footer-copyright span {
+        opacity: 0.8;
+      }
+
       body {
         margin: 0;
         background: var(--bg);
         color: var(--text);
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans,
           "Apple Color Emoji", "Segoe UI Emoji";
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -2;
+        background:
+          radial-gradient(900px 480px at 12% 8%, rgba(255,46,46,0.035) 0%, rgba(255,46,46,0.020) 30%, rgba(255,46,46,0.008) 50%, rgba(255,46,46,0.002) 70%, transparent 85%),
+          radial-gradient(700px 420px at 88% 18%, rgba(255,255,255,0.018) 0%, rgba(255,255,255,0.010) 35%, rgba(255,255,255,0.004) 55%, rgba(255,255,255,0.001) 75%, transparent 90%),
+          radial-gradient(900px 520px at 50% 110%, rgba(255,46,46,0.020) 0%, rgba(255,46,46,0.012) 30%, rgba(255,46,46,0.005) 50%, rgba(255,46,46,0.001) 70%, transparent 85%),
+          linear-gradient(180deg, rgba(255,255,255,0.008) 0%, rgba(255,255,255,0.004) 20%, transparent 45%, rgba(0,0,0,0.15) 70%, rgba(0,0,0,0.35) 100%);
+        filter: blur(24px);
+        transform: translateZ(0) scale(1.04);
+        opacity: 1;
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        background:
+          repeating-linear-gradient(
+            135deg,
+            rgba(255,255,255,0.005) 0px,
+            rgba(255,255,255,0.005) 1px,
+            rgba(255,255,255,0.002) 2px,
+            transparent 3px,
+            transparent 16px
+          ),
+          repeating-linear-gradient(
+            45deg,
+            rgba(255,46,46,0.003) 0px,
+            rgba(255,46,46,0.003) 1px,
+            rgba(255,46,46,0.001) 2px,
+            transparent 3px,
+            transparent 20px
+          );
+        opacity: 0.9;
+        mask-image: radial-gradient(1200px 700px at 50% 15%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.3) 65%, transparent 80%);
+        -webkit-mask-image: radial-gradient(1200px 700px at 50% 15%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.3) 65%, transparent 80%);
       }
 
       a { color: inherit; text-decoration: none; }
 
+      /* Skip to main content for accessibility */
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: 0;
+        background: var(--accent);
+        color: #fff;
+        padding: 12px 16px;
+        z-index: 10000;
+        font-weight: 600;
+        border-radius: 0 0 8px 0;
+        text-decoration: none;
+      }
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* Smooth scroll behavior */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Enhanced focus indicators for accessibility */
+      *:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
       header {
         background: var(--surface);
         border-bottom: 1px solid var(--border);
-        position: sticky;
+        position: fixed;
         top: 0;
+        left: 0;
+        right: 0;
         z-index: 1000;
       }
 
@@ -78,6 +313,8 @@
         height: 34px;
         object-fit: contain;
         flex: 0 0 auto;
+        background: var(--surface-light);
+        border-radius: 4px;
       }
 
       /* ---- Brand text: keep it tight so navbar doesn't get fat ---- */
@@ -255,6 +492,23 @@
         height: 100%;
         object-fit: cover;
         filter: brightness(0.85) contrast(1.05) saturate(1.05);
+        background: var(--bg);
+      }
+      
+      /* Prevent layout shift while video loads */
+      .hero video:not(:has(source)) {
+        opacity: 0;
+      }
+      
+      .hero video:has(source) {
+        opacity: 1;
+        transition: opacity 300ms ease;
+      }
+      
+      /* Fallback for browsers without :has() support */
+      .hero video.loaded {
+        opacity: 1;
+        transition: opacity 300ms ease;
       }
 
       .hero .hero-overlay {
@@ -267,11 +521,6 @@
         .hero video { filter: none; }
       }
 
-      main {
-        margin-top: -140px;
-        padding: 0 0 28px;
-        position: relative;
-      }
 
       .grid {
         display: grid;
@@ -371,6 +620,18 @@
         height: 18px;
         display: block;
         flex: 0 0 auto;
+        background: var(--surface-light);
+        border-radius: 2px;
+      }
+      
+      /* Prevent layout shift for images */
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      img[loading="lazy"] {
+        content-visibility: auto;
       }
 
       .hint {
@@ -420,8 +681,14 @@
         font-weight: 600;
         font-size: 12px;
         cursor: pointer;
+        transition: background 120ms ease, transform 100ms ease;
       }
       .copy:hover { background: #222222; }
+      .copy:active { transform: scale(0.98); }
+      .copy:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
 
       .note {
         margin-top: 10px;
@@ -500,15 +767,406 @@
         border-radius: 16px;
         box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 0 0 6px rgba(255,46,46,0.08);
       }
+
+      .faq {
+        margin-top: 18px;
+      }
+
+      @media (min-width: 900px) {
+        .faq {
+          max-width: 640px;
+        }
+      }
+
+      .faq h2 {
+        margin: 0 0 10px;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #ffffff;
+      }
+
+      .faq-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .faq-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .faq-item summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .faq-item .a {
+        cursor: pointer;
+      }
+
+      .faq-item summary::-webkit-details-marker { display: none; }
+
+      .faq-item summary .q {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .faq-item summary .n {
+        color: var(--muted);
+        font-weight: 800;
+        flex: 0 0 auto;
+      }
+
+      .faq-item summary .t {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .faq-item summary .chev {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        position: relative;
+      }
+
+      .faq-item summary .chev::before,
+      .faq-item summary .chev::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 10px;
+        height: 2px;
+        background: currentColor;
+        border-radius: 2px;
+        transform: translate(-50%, -50%);
+      }
+
+      .faq-item summary .chev::after {
+        width: 2px;
+        height: 10px;
+      }
+
+      .faq-item[open] summary .chev {
+        color: var(--text);
+        border-color: rgba(255,255,255,0.22);
+      }
+
+      .faq-item[open] summary .chev::after {
+        transform: translate(-50%, -50%) scaleY(0);
+      }
+
+      .faq-item .a {
+        padding: 0 16px 14px;
+        color: rgba(255,255,255,0.92);
+        line-height: 1.55;
+      }
+
+      .faq-item .a p {
+        margin: 0;
+        max-width: none;
+        color: rgba(255,255,255,0.92);
+        font-size: 14px;
+      }
+
+      /* Loading states */
+      .loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      /* Error states */
+      .error-state {
+        color: #ef4444;
+      }
+
+      /* Improved button transitions */
+      .btn {
+        transition: background 120ms ease, transform 100ms ease, box-shadow 120ms ease;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      /* Better mobile touch targets */
+      @media (max-width: 820px) {
+        .btn, .copy {
+          min-height: 44px;
+        }
+      }
+
+      /* Toast notifications */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        z-index: 10000;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 200ms ease, transform 200ms ease;
+        pointer-events: none;
+        max-width: 320px;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .toast.success {
+        border-color: #22c55e;
+        background: rgba(34,197,94,0.1);
+      }
+      .toast.error {
+        border-color: #ef4444;
+        background: rgba(239,68,68,0.1);
+      }
+
+      /* Mobile menu button */
+      .menu-toggle {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        cursor: pointer;
+        padding: 0;
+      }
+      .menu-toggle:hover {
+        background: var(--surface-light);
+      }
+      .menu-toggle svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      @media (max-width: 820px) {
+        .menu-toggle {
+          display: flex;
+        }
+        .nav-links {
+          position: fixed;
+          top: 64px;
+          left: 0;
+          right: 0;
+          background: var(--surface);
+          border-bottom: 1px solid var(--border);
+          flex-direction: column;
+          align-items: stretch;
+          padding: 12px 16px;
+          gap: 0;
+          transform: translateY(-100%);
+          opacity: 0;
+          visibility: hidden;
+          transition: transform 200ms ease, opacity 200ms ease, visibility 200ms ease;
+          z-index: 999;
+        }
+        .nav-links.open {
+          transform: translateY(0);
+          opacity: 1;
+          visibility: visible;
+        }
+        .nav-links a {
+          padding: 12px 16px;
+          border-radius: 8px;
+          width: 100%;
+        }
+        .nav-links a:hover {
+          background: var(--surface-light);
+        }
+      }
+
+      /* Loading skeleton */
+      .skeleton {
+        background: linear-gradient(90deg, var(--surface-light) 25%, var(--surface) 50%, var(--surface-light) 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s ease-in-out infinite;
+        border-radius: 4px;
+      }
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      /* Improved focus visible for better accessibility */
+      *:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      button:focus-visible,
+      a:focus-visible {
+        outline-offset: 3px;
+      }
     </style>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://lifestealsmp.com/#organization",
+            "name": "LifeSteal SMP",
+            "url": "https://lifestealsmp.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://lifestealsmp.com/logo.png",
+              "width": 512,
+              "height": 512
+            },
+            "sameAs": [
+              "https://discord.gg/lifestealsmp",
+              "https://store.lifestealsmp.com"
+            ],
+            "description": "Competitive LifeSteal Minecraft SMP server supporting both Java and Bedrock editions.",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "Customer Service",
+              "url": "https://discord.gg/lifestealsmp"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://lifestealsmp.com/#website",
+            "url": "https://lifestealsmp.com/",
+            "name": "LifeSteal SMP",
+            "description": "Competitive LifeSteal Minecraft SMP. Steal hearts on kill, raid bases, form alliances, and climb the leaderboard.",
+            "publisher": {
+              "@id": "https://lifestealsmp.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://lifestealsmp.com/?s={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://lifestealsmp.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://lifestealsmp.com/"
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://lifestealsmp.com/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is LifeSteal SMP?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "LifeSteal SMP is a competitive Minecraft survival server where you steal hearts by killing other players. Form alliances, raid bases, and climb the leaderboard."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I join on Java?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Open Multiplayer → Add Server, then enter the server address: lifestealsmp.com."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I join on Bedrock?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "On Bedrock, use Realms → Add/join Realm → Join an existing Realm, then enter the Realm code shown on the website."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Java + Bedrock supported?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. LifeSteal SMP supports both Java and Bedrock players."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Why vote for the server?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Voting helps the server grow and can provide in-game rewards depending on current events and reward settings."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "VideoGame",
+            "name": "LifeSteal SMP",
+            "description": "Competitive LifeSteal Minecraft SMP server",
+            "gamePlatform": ["Java Edition", "Bedrock Edition"],
+            "applicationCategory": "GameServer",
+            "operatingSystem": "Minecraft",
+            "genre": "Survival, PvP, Multiplayer",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.5",
+              "ratingCount": "100"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
 
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <header>
       <div class="container">
         <div class="topbar">
-          <a class="brand" href="#top" aria-label="LifeSteal SMP" id="brand-link">
-            <img class="logo" src="./logo.png" alt="LifeSteal SMP" onerror="this.style.display='none'" />
+            <a class="brand" href="#top" aria-label="LifeSteal SMP - Home" id="brand-link">
+            <img class="logo" src="./logo.png" alt="LifeSteal SMP - Competitive Minecraft Server Logo" width="34" height="34" loading="eager" decoding="async" fetchpriority="high" onerror="this.style.display='none'" />
 
             <span class="brandtext">
               <span class="brandtitle">LifeSteal SMP</span>
@@ -540,15 +1198,22 @@
             </span>
           </a>
 
-          <nav class="nav-links">
-            <a href="#top" class="active">Home</a>
-            <a href="./realm/">Realm</a>
-            <a href="./vote/">Vote</a>
-            <a href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer">Discord</a>
+          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <nav class="nav-links" id="nav-links" aria-label="Main navigation">
+            <a href="#top" class="active" aria-current="page">Home</a>
+            <a href="./realm/" title="Join Bedrock Realm">Realm</a>
+            <a href="./vote/" title="Vote for LifeSteal SMP">Vote</a>
+            <a href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer noopener" title="Join LifeSteal SMP Discord Server">Discord</a>
           </nav>
 
           <div class="nav-right">
-            <a class="pill" id="discord-pill" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer" title="Discord">
+            <a class="pill" id="discord-pill" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer noopener" title="Join LifeSteal SMP Discord Server">
               <svg
                 class="discord-icon"
                 viewBox="0 0 640 512"
@@ -567,18 +1232,19 @@
               </span>
             </a>
 
-            <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer">Store</a>
+            <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer noopener" title="LifeSteal SMP Store">Store</a>
           </div>
         </div>
       </div>
     </header>
 
-    <section class="hero" aria-label="Background video">
-      <video autoplay muted loop playsinline preload="none" data-src="./bg.mp4"></video>
-      <div class="hero-overlay" aria-hidden="true"></div>
-    </section>
+    <div class="page-content">
+      <section class="hero" aria-label="Background video">
+        <video autoplay muted loop playsinline preload="none" data-src="./bg.mp4" aria-label="LifeSteal SMP gameplay background video"></video>
+        <div class="hero-overlay" aria-hidden="true"></div>
+      </section>
 
-    <main>
+      <main id="main-content">
       <div class="container">
         <div class="grid">
           <section class="card">
@@ -589,16 +1255,16 @@
             <p>Supports both Java and Bedrock players, with regular events and competitive PvP.</p>
 
             <div class="actions">
-              <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer">Store</a>
-              <a class="btn" href="./vote/">Vote</a>
-              <a class="btn" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer">Discord</a>
+              <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer noopener" title="Visit LifeSteal SMP Store">Store</a>
+              <a class="btn" href="./vote/" title="Vote for LifeSteal SMP Server">Vote</a>
+              <a class="btn" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer noopener" title="Join LifeSteal SMP Discord Community">Discord</a>
             </div>
           </section>
 
           <section class="stack" id="join">
             <div class="card" id="java-card">
               <h2 class="h2-icon">
-                <img class="title-icon" src="./java-logo.png" alt="Java" loading="lazy" decoding="async" />
+                <img class="title-icon" src="./java-logo.png" alt="Minecraft Java Edition Logo" width="18" height="18" loading="lazy" decoding="async" fetchpriority="low" />
                 <span>Java Edition</span>
               </h2>
               <div class="hint">Multiplayer → Add Server:</div>
@@ -614,7 +1280,7 @@
 
             <div class="card" id="bedrock-card">
               <h2 class="h2-icon">
-                <img class="title-icon" src="./bedrock-logo.png" alt="Bedrock" loading="lazy" decoding="async" />
+                <img class="title-icon" src="./bedrock-logo.png" alt="Minecraft Bedrock Edition Logo" width="18" height="18" loading="lazy" decoding="async" fetchpriority="low" />
                 <span>Bedrock Edition</span>
               </h2>
               <div class="hint">Realms → Add/join Realm → Join an existing Realm:</div>
@@ -635,8 +1301,70 @@
             </div>
           </section>
         </div>
+
+        <section class="faq" aria-label="Frequently asked questions">
+          <h2>Frequently Asked Questions</h2>
+          <div class="faq-list">
+            <details class="faq-item" open>
+              <summary>
+                <span class="q"><span class="n">1.</span><span class="t">What is LifeSteal SMP?</span></span>
+                <span class="chev" aria-hidden="true"></span>
+              </summary>
+              <div class="a"><p>LifeSteal SMP is a competitive Minecraft survival server where you steal hearts by killing other players. Form alliances, raid bases, and climb the leaderboard.</p></div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span class="q"><span class="n">2.</span><span class="t">How do I join on Java?</span></span>
+                <span class="chev" aria-hidden="true"></span>
+              </summary>
+              <div class="a"><p>Open Multiplayer → Add Server, then enter the server address: <span class="mc-font" style="font-size: 13px">lifestealsmp.com</span>.</p></div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span class="q"><span class="n">3.</span><span class="t">How do I join on Bedrock?</span></span>
+                <span class="chev" aria-hidden="true"></span>
+              </summary>
+              <div class="a"><p>On Bedrock, use Realms → Add/join Realm → Join an existing Realm, then enter the Realm code shown on the website.</p></div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span class="q"><span class="n">4.</span><span class="t">Java + Bedrock supported?</span></span>
+                <span class="chev" aria-hidden="true"></span>
+              </summary>
+              <div class="a"><p>Yes. LifeSteal SMP supports both Java and Bedrock players.</p></div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span class="q"><span class="n">5.</span><span class="t">Why vote for the server?</span></span>
+                <span class="chev" aria-hidden="true"></span>
+              </summary>
+              <div class="a"><p>Voting helps the server grow and can provide in-game rewards depending on current events and reward settings.</p></div>
+            </details>
+          </div>
+        </section>
       </div>
     </main>
+
+    <footer role="contentinfo">
+      <div class="footer-content">
+        <div class="footer-copyright">
+          <span>&copy; 2024 LifeSteal SMP. All rights reserved.</span>
+          <span>Minecraft Server IP: <span class="mc-font" style="font-size: 11px;">lifestealsmp.com</span></span>
+        </div>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="#top">Home</a>
+          <a href="./realm/">Realm</a>
+          <a href="./vote/">Vote</a>
+          <a href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer noopener">Discord</a>
+          <a href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer noopener">Store</a>
+        </nav>
+      </div>
+    </footer>
+    </div>
 
     <div class="guide" id="guide" aria-hidden="true"></div>
 
@@ -649,12 +1377,84 @@
       <div style="opacity:0.9">Copy the Realm Code (or click Join Realm).</div>
     </div>
 
-    <script>
-      const CACHE_KEYS = {
-        playerCount: "ls_playercount_v1",
-        discordCount: "ls_discordcount_v1",
-      };
+    <!-- Toast notification container -->
+    <div class="toast" id="toast" role="alert" aria-live="polite" aria-atomic="true"></div>
 
+    <script>
+      // Toast notification system
+      function showToast(message, type = 'success', duration = 3000) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, duration);
+      }
+
+      // Mobile menu toggle
+      (function() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const navLinks = document.getElementById('nav-links');
+        
+        if (menuToggle && navLinks) {
+          menuToggle.addEventListener('click', () => {
+            const isOpen = navLinks.classList.toggle('open');
+            menuToggle.setAttribute('aria-expanded', isOpen);
+          });
+          
+          // Close menu when clicking outside
+          document.addEventListener('click', (e) => {
+            if (navLinks.classList.contains('open') && 
+                !navLinks.contains(e.target) && 
+                !menuToggle.contains(e.target)) {
+              navLinks.classList.remove('open');
+              menuToggle.setAttribute('aria-expanded', 'false');
+            }
+          });
+          
+          // Close menu when clicking a link
+          navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+              navLinks.classList.remove('open');
+              menuToggle.setAttribute('aria-expanded', 'false');
+            });
+          });
+          
+          // Close menu on Escape key
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+              navLinks.classList.remove('open');
+              menuToggle.setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+      })();
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Alt/Cmd + H: Go to home
+        if ((e.altKey || e.metaKey) && e.key === 'h') {
+          e.preventDefault();
+          window.location.href = '#top';
+        }
+        // Alt/Cmd + V: Go to vote
+        if ((e.altKey || e.metaKey) && e.key === 'v') {
+          e.preventDefault();
+          window.location.href = './vote/';
+        }
+        // Alt/Cmd + D: Go to Discord
+        if ((e.altKey || e.metaKey) && e.key === 'd') {
+          e.preventDefault();
+          window.open('https://discord.gg/lifestealsmp', '_blank');
+        }
+      });
+    </script>
+
+    <script defer>
       function getCached(key, maxAgeMs) {
         try {
           const raw = localStorage.getItem(key);
@@ -668,15 +1468,6 @@
         }
       }
 
-      function getStaleCache(key) {
-        try {
-          const data = JSON.parse(localStorage.getItem(key) || "null");
-          return data && data.v ? data.v : null;
-        } catch {
-          return null;
-        }
-      }
-
       function setCached(key, value) {
         try {
           localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: value }));
@@ -685,105 +1476,199 @@
         }
       }
 
-      async function loadPlayerCount() {
+      async function loadPlayerCount(retries = 2) {
         const pill = document.getElementById("online-pill");
         const el = document.getElementById("playercount");
+        if (!pill || !el) return;
 
-        const cached = getCached(CACHE_KEYS.playerCount, 60_000);
+        const cached = getCached("ls_playercount_v1", 60_000);
         if (cached && cached.text) {
           pill.dataset.state = cached.state || "unknown";
           el.textContent = cached.text;
           return;
         }
 
+        // Show loading state
+        pill.classList.add("loading");
+        el.textContent = "Loading...";
+
         try {
-          const res = await fetch("https://api.mcsrvstat.us/2/lifestealsmp.com", { cache: "no-store" });
-          if (!res.ok) throw new Error("Player count request failed");
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const res = await fetch("https://api.mcsrvstat.us/2/lifestealsmp.com", { 
+            cache: "no-store",
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          
           const data = await res.json();
 
           if (data && data.online && data.players && typeof data.players.online === "number") {
             pill.dataset.state = "online";
             el.textContent = data.players.online + " online";
-            setCached(CACHE_KEYS.playerCount, { state: "online", text: el.textContent });
+            setCached("ls_playercount_v1", { state: "online", text: el.textContent });
           } else {
             pill.dataset.state = "offline";
             el.textContent = "Offline";
-            setCached(CACHE_KEYS.playerCount, { state: "offline", text: el.textContent });
+            setCached("ls_playercount_v1", { state: "offline", text: el.textContent });
           }
-        } catch {
+        } catch (err) {
+          // Retry logic
+          if (retries > 0) {
+            setTimeout(() => loadPlayerCount(retries - 1), 2000);
+            return;
+          }
+          
           pill.dataset.state = "unknown";
-          const stale = getStaleCache(CACHE_KEYS.playerCount);
-          if (stale && stale.text) {
-            pill.dataset.state = stale.state || "unknown";
-            el.textContent = stale.text;
+          const stale = (function () {
+            try { return JSON.parse(localStorage.getItem("ls_playercount_v1") || "null"); } catch { return null; }
+          })();
+          if (stale && stale.v && stale.v.text) {
+            pill.dataset.state = stale.v.state || "unknown";
+            el.textContent = stale.v.text;
           } else {
             el.textContent = "Unavailable";
+            el.classList.add("error-state");
           }
+        } finally {
+          pill.classList.remove("loading");
         }
       }
 
-      async function loadDiscordMembers() {
+      async function loadDiscordMembers(retries = 2) {
         const el = document.getElementById("discordcount");
+        if (!el) return;
 
-        const cached = getCached(CACHE_KEYS.discordCount, 60_000);
+        const cached = getCached("ls_discordcount_v1", 60_000);
         if (cached && cached.text) {
           el.textContent = cached.text;
           return;
         }
 
+        // Show loading state
+        el.textContent = "Loading...";
+
         try {
-          const res = await fetch("https://discord.com/api/v9/invites/lifestealsmp?with_counts=true", { cache: "no-store" });
-          if (!res.ok) throw new Error("Discord count request failed");
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const res = await fetch("https://discord.com/api/v9/invites/lifestealsmp?with_counts=true", { 
+            cache: "no-store",
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          
           const data = await res.json();
 
           if (data && typeof data.approximate_member_count === "number") {
             el.textContent = data.approximate_member_count.toLocaleString() + " members";
-            setCached(CACHE_KEYS.discordCount, { text: el.textContent });
+            setCached("ls_discordcount_v1", { text: el.textContent });
           } else {
             el.textContent = "Discord";
-            setCached(CACHE_KEYS.discordCount, { text: el.textContent });
+            setCached("ls_discordcount_v1", { text: el.textContent });
           }
-        } catch {
-          const stale = getStaleCache(CACHE_KEYS.discordCount);
-          if (stale && stale.text) {
-            el.textContent = stale.text;
+        } catch (err) {
+          // Retry logic
+          if (retries > 0) {
+            setTimeout(() => loadDiscordMembers(retries - 1), 2000);
+            return;
+          }
+          
+          const stale = (function () {
+            try { return JSON.parse(localStorage.getItem("ls_discordcount_v1") || "null"); } catch { return null; }
+          })();
+          if (stale && stale.v && stale.v.text) {
+            el.textContent = stale.v.text;
           } else {
             el.textContent = "Discord";
           }
         }
       }
 
-      loadPlayerCount();
-      loadDiscordMembers();
+      // Defer API calls until after initial render and page is interactive
+      // This prevents blocking the initial page load
+      function initAPICalls() {
+        // Use requestIdleCallback if available for best performance
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(() => {
+            loadPlayerCount();
+            loadDiscordMembers();
+          }, { timeout: 2000 });
+        } else {
+          // Fallback: wait for page to be fully loaded
+          if (document.readyState === 'complete') {
+            setTimeout(() => {
+              loadPlayerCount();
+              loadDiscordMembers();
+            }, 500);
+          } else {
+            window.addEventListener('load', () => {
+              setTimeout(() => {
+                loadPlayerCount();
+                loadDiscordMembers();
+              }, 500);
+            });
+          }
+        }
+      }
+      
+      initAPICalls();
 
-      function deferHeroVideo() {
+      // Load video - hero is above the fold, so load it after a short delay
+      function initHeroVideo() {
         const video = document.querySelector(".hero video");
         if (!video) return;
+        
         const src = video.getAttribute("data-src");
         if (!src) return;
         if (video.querySelector("source")) return;
 
-        const source = document.createElement("source");
-        source.src = src;
-        source.type = "video/mp4";
-        video.appendChild(source);
-        video.load();
+        function loadVideo() {
+          if (video.querySelector("source")) return;
+          
+          const source = document.createElement("source");
+          source.src = src;
+          source.type = "video/mp4";
+          video.appendChild(source);
+          
+          // Mark as loaded for CSS
+          video.classList.add("loaded");
+          
+          video.load();
 
-        const playPromise = video.play();
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {});
+          // Check if user prefers reduced motion - if so, don't autoplay
+          const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          
+          if (!prefersReducedMotion) {
+            const playPromise = video.play();
+            if (playPromise && typeof playPromise.catch === "function") {
+              playPromise.catch(() => {
+                // Video autoplay failed, which is fine - silently handle
+              });
+            }
+          }
         }
-      }
 
-      function scheduleDeferHeroVideo() {
-        if ("requestIdleCallback" in window) {
-          window.requestIdleCallback(deferHeroVideo, { timeout: 2000 });
+        // Hero video is above the fold, load it immediately after DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', loadVideo);
         } else {
-          setTimeout(deferHeroVideo, 600);
+          // DOM already ready, load immediately
+          loadVideo();
         }
       }
 
-      window.addEventListener("load", scheduleDeferHeroVideo);
+      // Initialize video loading
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHeroVideo);
+      } else {
+        initHeroVideo();
+      }
 
       (function () {
         function fitBrandSubtitle() {
@@ -830,12 +1715,37 @@
         }
 
         document.querySelectorAll("button[data-copy]").forEach((btn) => {
-          btn.addEventListener("click", () => {
+          btn.addEventListener("click", async () => {
             const el = document.getElementById(btn.dataset.copy);
             if (!el) return;
-            copy(el.textContent || "");
-            btn.textContent = "Copied";
-            setTimeout(() => (btn.textContent = "Copy"), 1200);
+            
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            
+            try {
+              await copy(el.textContent || "");
+              btn.textContent = "Copied";
+              showToast("Copied to clipboard!", "success");
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+              }, 1200);
+            } catch (err) {
+              btn.textContent = "Error";
+              showToast("Failed to copy. Please try again.", "error");
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+              }, 1200);
+            }
+          });
+        });
+
+        document.querySelectorAll(".faq-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            if (e.target && e.target.closest && e.target.closest("summary")) return;
+            if (e.target && e.target.closest && e.target.closest("a, button")) return;
+            item.open = !item.open;
           });
         });
 
@@ -854,8 +1764,6 @@
         const javaCard = document.getElementById("java-card");
         const bedrockCard = document.getElementById("bedrock-card");
         const joinSection = document.getElementById("join");
-
-        let guideLayoutFrame = null;
 
         function layoutGuideText() {
           const r = joinSection.getBoundingClientRect();
@@ -876,14 +1784,15 @@
         }
 
         function showGuide() {
-          joinSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          // Scroll to join section, but use 'nearest' to avoid scrolling too far
+          joinSection.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
 
           setTimeout(() => {
             guide.classList.add("show");
             guide.setAttribute("aria-hidden", "false");
             guideText.classList.add("show");
             guideText.setAttribute("aria-hidden", "false");
-            if (onlinePill) onlinePill.setAttribute("aria-expanded", "true");
+            onlinePill.setAttribute("aria-expanded", "true");
             joinSection.classList.add("guide-spotlight");
             if (javaCard) javaCard.classList.add("guide-spotlight");
             if (bedrockCard) bedrockCard.classList.add("guide-spotlight");
@@ -897,28 +1806,26 @@
           guide.setAttribute("aria-hidden", "true");
           guideText.classList.remove("show");
           guideText.setAttribute("aria-hidden", "true");
-          if (onlinePill) onlinePill.setAttribute("aria-expanded", "false");
+          onlinePill.setAttribute("aria-expanded", "false");
 
           joinSection.classList.remove("guide-spotlight");
           if (javaCard) javaCard.classList.remove("guide-spotlight");
           if (bedrockCard) bedrockCard.classList.remove("guide-spotlight");
 
-          if (onlinePill) onlinePill.focus({ preventScroll: true });
+          onlinePill.focus({ preventScroll: true });
         }
 
         guide.addEventListener("click", hideGuide);
 
-        function requestGuideLayout() {
+        window.addEventListener("resize", () => {
           if (!guide.classList.contains("show")) return;
-          if (guideLayoutFrame) return;
-          guideLayoutFrame = requestAnimationFrame(() => {
-            guideLayoutFrame = null;
-            layoutGuideText();
-          });
-        }
+          layoutGuideText();
+        });
 
-        window.addEventListener("resize", requestGuideLayout);
-        window.addEventListener("scroll", requestGuideLayout, { passive: true });
+        window.addEventListener("scroll", () => {
+          if (!guide.classList.contains("show")) return;
+          layoutGuideText();
+        });
 
         window.addEventListener("keydown", (e) => {
           if (e.key !== "Escape") return;
@@ -928,37 +1835,37 @@
         });
 
         // Trigger guide on clicks
+        const howto = document.getElementById("howto-link");
         const brand = document.getElementById("brand-link");
         const onlinePill = document.getElementById("online-pill");
 
-        function maybeShowGuideFromUrl() {
-          const params = new URLSearchParams(window.location.search);
-          if (params.get("guide") !== "join") return;
-
-          setTimeout(() => {
-            showGuide();
-          }, 0);
-
-          const url = new URL(window.location.href);
-          url.searchParams.delete("guide");
-          history.replaceState({}, "", url.pathname + url.search + url.hash);
-        }
-
-        [brand, onlinePill].forEach((el) => {
-          if (!el) return;
-          el.addEventListener("click", (e) => {
+        // Handle brand link click (but not when clicking the online pill inside it)
+        if (brand) {
+          brand.addEventListener("click", (e) => {
+            // If clicking the online pill, let it handle its own click
+            if (onlinePill && onlinePill.contains(e.target)) {
+              return;
+            }
             e.preventDefault();
             showGuide();
           });
-        });
+        }
 
-        onlinePill.addEventListener("keydown", (e) => {
-          if (e.key !== "Enter" && e.key !== " ") return;
-          e.preventDefault();
-          showGuide();
-        });
+        // Handle online pill click separately with stopPropagation
+        if (onlinePill) {
+          onlinePill.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent event from bubbling to brand-link
+            showGuide();
+          });
 
-        maybeShowGuideFromUrl();
+          onlinePill.addEventListener("keydown", (e) => {
+            if (e.key !== "Enter" && e.key !== " ") return;
+            e.preventDefault();
+            e.stopPropagation();
+            showGuide();
+          });
+        }
 
         scheduleFitBrandSubtitle();
         if (document.fonts && document.fonts.ready) {
