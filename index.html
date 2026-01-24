@@ -20,6 +20,7 @@
     <link rel="canonical" href="https://www.lifestealsmp.com/" />
     <link rel="icon" href="./favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="./logo.png" />
+    <link rel="stylesheet" href="./css/common.css" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -119,12 +120,15 @@
         background: var(--surface);
       }
 
-      main {
+      .page-content main {
         margin-top: -140px;
         padding: 0 0 48px;
         position: relative;
         width: 100%;
         box-sizing: border-box;
+        /* Override common.css - main should not scroll on index.html, .page-content does */
+        overflow: visible;
+        height: auto;
       }
 
       /* Footer */
@@ -314,40 +318,9 @@
         min-width: 0;
       }
 
-      .logo {
-        width: 34px;
-        height: 34px;
-        object-fit: contain;
-        flex: 0 0 auto;
-        background: var(--surface-light);
-        border-radius: 4px;
-      }
+      /* Logo styles are in css/common.css */
 
-      /* ---- Brand text: keep it tight so navbar doesn't get fat ---- */
-      .brandtext {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.05;
-        gap: 1px;            /* tighter */
-        min-width: 0;
-        align-items: flex-start;
-        text-align: left;
-        width: max-content;
-      }
-      .brandtitle {
-        font-weight: 750;
-        letter-spacing: -0.03em;
-        white-space: nowrap;
-        width: max-content;
-      }
-      .brandsub {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--muted);
-        margin-top: -2px;    /* pull closer to title */
-        white-space: nowrap;
-        width: 100%;
-      }
+      /* Brand text styles are in css/common.css */
 
       /* ---- Pills ---- */
       .pill {
@@ -432,34 +405,7 @@
       }
       .pill:hover .discord-icon { color: var(--text); }
 
-      .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        justify-content: center;
-      }
-
-      .nav-links a {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--muted);
-      }
-      .nav-links a:hover { color: var(--text); }
-
-      .nav-links a.active {
-        color: var(--text);
-        position: relative;
-      }
-      .nav-links a.active::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -8px;
-        height: 2px;
-        background: var(--accent);
-        border-radius: 2px;
-      }
+      /* Navbar link styles are in css/common.css */
 
       .nav-right {
         display: flex;
@@ -1168,82 +1114,7 @@
 
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <header>
-      <div class="container">
-        <div class="topbar">
-            <a class="brand" href="#top" aria-label="LifeSteal SMP - Home" id="brand-link">
-            <img class="logo" src="./logo.png" alt="LifeSteal SMP - Competitive Minecraft Server Logo" width="34" height="34" loading="eager" decoding="async" fetchpriority="high" onerror="this.style.display='none'" />
-
-            <span class="brandtext">
-              <span class="brandtitle">LifeSteal SMP</span>
-              <span class="brandsub">Java &amp; Bedrock</span>
-            </span>
-
-            <!-- Player count pill (clickable guide trigger) -->
-            <span class="pill" id="online-pill" data-state="unknown" title="Online players" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="guide-text" aria-expanded="false">
-              <svg
-                class="pixel-icon"
-                viewBox="0 0 512 512"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  fill="currentColor"
-                  d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9V344c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z"
-                />
-              </svg>
-
-
-              <span class="pill-text">
-                <span class="pill-topline">
-                  <span class="status-dot" aria-hidden="true"></span>
-                  <span id="playercount">…</span>
-                </span>
-                <span class="pill-sub">Play Now</span>
-              </span>
-            </span>
-          </a>
-
-          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-          <nav class="nav-links" id="nav-links" aria-label="Main navigation">
-            <a href="#top" class="active" aria-current="page">Home</a>
-            <a href="./realm/" title="Join Bedrock Realm">Realm</a>
-            <a href="./vote/" title="Vote for LifeSteal SMP">Vote</a>
-            <a href="./rgb/" title="RGB Gradient Generator">RGB</a>
-            <a href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer noopener" title="Join LifeSteal SMP Discord Server">Discord</a>
-          </nav>
-
-          <div class="nav-right">
-            <a class="pill" id="discord-pill" href="https://discord.gg/lifestealsmp" target="_blank" rel="noreferrer noopener" title="Join LifeSteal SMP Discord Server">
-              <svg
-                class="discord-icon"
-                viewBox="0 0 640 512"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  fill="currentColor"
-                  d="M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6a447.848,447.848,0,0,0-134.426,0a309.541,309.541,0,0,0-15.135-30.6a1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588a321.173,321.173,0,0,1-45.868-21.853a1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126a301.407,301.407,0,0,1-45.89,21.83a1.875,1.875,0,0,0-1,2.611a391.055,391.055,0,0,0,30.014,48.815a1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z"
-                />
-              </svg>
-
-              <span class="pill-text">
-                <span id="discordcount">…</span>
-                <span class="pill-sub">Join Discord</span>
-              </span>
-            </a>
-
-            <a class="btn btn-primary" href="https://store.lifestealsmp.com" target="_blank" rel="noreferrer noopener" title="LifeSteal SMP Store">Store</a>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- Navbar will be injected by js/common.js -->
 
     <div class="page-content">
       <div class="guide" id="guide" aria-hidden="true"></div>
@@ -1356,36 +1227,7 @@
         </section>
       </div>
     </main>
-
-    <footer role="contentinfo">
-      <div class="footer-content">
-        <div class="footer-left">
-          <div class="footer-copyright">
-            <div class="footer-copyright-text">
-              <span>LifeSteal SMP <span id="current-year"></span></span>
-            </div>
-            <div class="footer-copyright-disclaimer">Not affiliated with Mojang.</div>
-          </div>
-        </div>
-        <div class="footer-social" aria-label="Social media links">
-          <a href="#" target="_blank" rel="noreferrer noopener" title="YouTube" aria-label="YouTube">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-          </a>
-          <a href="#" target="_blank" rel="noreferrer noopener" title="TikTok" aria-label="TikTok">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.07 6.07 0 0 0-1-.05A6.67 6.67 0 0 0 5 20.1a6.67 6.67 0 0 0 11.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.04-.1z"/>
-            </svg>
-          </a>
-          <a href="#" target="_blank" rel="noreferrer noopener" title="Instagram" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </footer>
+    <!-- Footer will be injected by js/common.js -->
     </div>
 
     <div class="guide-text" id="guide-text" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1">
@@ -1415,52 +1257,9 @@
         }, duration);
       }
 
-      // Set current year in footer
-      (function() {
-        const yearElement = document.getElementById('current-year');
-        if (yearElement) {
-          yearElement.textContent = new Date().getFullYear();
-        }
-      })();
+      // Current year is set by js/common.js in renderFooter()
 
-      // Mobile menu toggle
-      (function() {
-        const menuToggle = document.getElementById('menu-toggle');
-        const navLinks = document.getElementById('nav-links');
-        
-        if (menuToggle && navLinks) {
-          menuToggle.addEventListener('click', () => {
-            const isOpen = navLinks.classList.toggle('open');
-            menuToggle.setAttribute('aria-expanded', isOpen);
-          });
-          
-          // Close menu when clicking outside
-          document.addEventListener('click', (e) => {
-            if (navLinks.classList.contains('open') && 
-                !navLinks.contains(e.target) && 
-                !menuToggle.contains(e.target)) {
-              navLinks.classList.remove('open');
-              menuToggle.setAttribute('aria-expanded', 'false');
-            }
-          });
-          
-          // Close menu when clicking a link
-          navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-              navLinks.classList.remove('open');
-              menuToggle.setAttribute('aria-expanded', 'false');
-            });
-          });
-          
-          // Close menu on Escape key
-          document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && navLinks.classList.contains('open')) {
-              navLinks.classList.remove('open');
-              menuToggle.setAttribute('aria-expanded', 'false');
-            }
-          });
-        }
-      })();
+      // Mobile menu toggle is handled by js/common.js
 
       // Scroll to top function for fixed scrollable container
       function scrollToTop() {
@@ -1497,170 +1296,8 @@
 
     </script>
 
+    <script src="js/common.js"></script>
     <script defer>
-      function getCached(key, maxAgeMs) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (!raw) return null;
-          const data = JSON.parse(raw);
-          if (!data || typeof data.t !== "number") return null;
-          if (Date.now() - data.t > maxAgeMs) return null;
-          return data.v;
-        } catch {
-          return null;
-        }
-      }
-
-      function setCached(key, value) {
-        try {
-          localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: value }));
-        } catch {
-          // ignore
-        }
-      }
-
-      async function loadPlayerCount(retries = 2) {
-        const pill = document.getElementById("online-pill");
-        const el = document.getElementById("playercount");
-        if (!pill || !el) return;
-
-        const cached = getCached("ls_playercount_v1", 60_000);
-        if (cached && cached.text) {
-          pill.dataset.state = cached.state || "unknown";
-          el.textContent = cached.text;
-          return;
-        }
-
-        // Show loading state
-        pill.classList.add("loading");
-        el.textContent = "Loading...";
-
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          
-          const res = await fetch("https://api.mcsrvstat.us/2/lifestealsmp.com", { 
-            cache: "no-store",
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-          
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          
-          const data = await res.json();
-
-          if (data && data.online && data.players && typeof data.players.online === "number") {
-            pill.dataset.state = "online";
-            el.textContent = data.players.online + " online";
-            setCached("ls_playercount_v1", { state: "online", text: el.textContent });
-          } else {
-            pill.dataset.state = "offline";
-            el.textContent = "Offline";
-            setCached("ls_playercount_v1", { state: "offline", text: el.textContent });
-          }
-        } catch (err) {
-          // Retry logic
-          if (retries > 0) {
-            setTimeout(() => loadPlayerCount(retries - 1), 2000);
-            return;
-          }
-          
-          pill.dataset.state = "unknown";
-          const stale = (function () {
-            try { return JSON.parse(localStorage.getItem("ls_playercount_v1") || "null"); } catch { return null; }
-          })();
-          if (stale && stale.v && stale.v.text) {
-            pill.dataset.state = stale.v.state || "unknown";
-            el.textContent = stale.v.text;
-          } else {
-            el.textContent = "Unavailable";
-            el.classList.add("error-state");
-          }
-        } finally {
-          pill.classList.remove("loading");
-        }
-      }
-
-      async function loadDiscordMembers(retries = 2) {
-        const el = document.getElementById("discordcount");
-        if (!el) return;
-
-        const cached = getCached("ls_discordcount_v1", 60_000);
-        if (cached && cached.text) {
-          el.textContent = cached.text;
-          return;
-        }
-
-        // Show loading state
-        el.textContent = "Loading...";
-
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          
-          const res = await fetch("https://discord.com/api/v9/invites/lifestealsmp?with_counts=true", { 
-            cache: "no-store",
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-          
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          
-          const data = await res.json();
-
-          if (data && typeof data.approximate_member_count === "number") {
-            el.textContent = data.approximate_member_count.toLocaleString() + " members";
-            setCached("ls_discordcount_v1", { text: el.textContent });
-          } else {
-            el.textContent = "Discord";
-            setCached("ls_discordcount_v1", { text: el.textContent });
-          }
-        } catch (err) {
-          // Retry logic
-          if (retries > 0) {
-            setTimeout(() => loadDiscordMembers(retries - 1), 2000);
-            return;
-          }
-          
-          const stale = (function () {
-            try { return JSON.parse(localStorage.getItem("ls_discordcount_v1") || "null"); } catch { return null; }
-          })();
-          if (stale && stale.v && stale.v.text) {
-            el.textContent = stale.v.text;
-          } else {
-            el.textContent = "Discord";
-          }
-        }
-      }
-
-      // Defer API calls until after initial render and page is interactive
-      // This prevents blocking the initial page load
-      function initAPICalls() {
-        // Use requestIdleCallback if available for best performance
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(() => {
-            loadPlayerCount();
-            loadDiscordMembers();
-          }, { timeout: 2000 });
-        } else {
-          // Fallback: wait for page to be fully loaded
-          if (document.readyState === 'complete') {
-            setTimeout(() => {
-              loadPlayerCount();
-              loadDiscordMembers();
-            }, 500);
-          } else {
-            window.addEventListener('load', () => {
-              setTimeout(() => {
-                loadPlayerCount();
-                loadDiscordMembers();
-              }, 500);
-            });
-          }
-        }
-      }
-      
-      initAPICalls();
 
       // Load video - hero is above the fold, so load it after a short delay
       function initHeroVideo() {
@@ -1715,45 +1352,7 @@
 
       (function () {
 
-        function copy(text) {
-          if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          ta.style.position = "fixed";
-          ta.style.opacity = "0";
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand("copy"); } catch (_) {}
-          document.body.removeChild(ta);
-          return Promise.resolve();
-        }
-
-        document.querySelectorAll("button[data-copy]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const el = document.getElementById(btn.dataset.copy);
-            if (!el) return;
-            
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            
-            try {
-              await copy(el.textContent || "");
-              btn.textContent = "Copied";
-              showToast("Copied to clipboard!", "success");
-              setTimeout(() => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-              }, 1200);
-            } catch (err) {
-              btn.textContent = "Error";
-              showToast("Failed to copy. Please try again.", "error");
-              setTimeout(() => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-              }, 1200);
-            }
-          });
-        });
+        // Copy functionality is handled by js/common.js initCopyButtons()
 
         document.querySelectorAll(".faq-item").forEach((item) => {
           item.addEventListener("click", (e) => {
@@ -1774,34 +1373,65 @@
         // ---- Guide overlay: darken everything except join cards ----
         const guide = document.getElementById("guide");
 
-        const javaCard = document.getElementById("java-card");
-        const bedrockCard = document.getElementById("bedrock-card");
-        const joinSection = document.getElementById("join");
-
-        function showGuide() {
+        window.showGuide = function showGuide() {
+          // Re-query elements each time to ensure they're found (in case DOM changes)
+          const javaCard = document.getElementById("java-card");
+          const bedrockCard = document.getElementById("bedrock-card");
+          const joinSection = document.getElementById("join");
+          const onlinePill = document.getElementById("online-pill");
+          
+          if (!joinSection) {
+            console.warn("Join section not found");
+            return;
+          }
+          
           // Scroll to join section, but use 'nearest' to avoid scrolling too far
           joinSection.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
 
           setTimeout(() => {
-            guide.classList.add("show");
-            guide.setAttribute("aria-hidden", "false");
-            onlinePill.setAttribute("aria-expanded", "true");
-            joinSection.classList.add("guide-spotlight");
-            if (javaCard) javaCard.classList.add("guide-spotlight");
-            if (bedrockCard) bedrockCard.classList.add("guide-spotlight");
+            if (guide) {
+              guide.classList.add("show");
+              guide.setAttribute("aria-hidden", "false");
+            }
+            if (onlinePill) {
+              onlinePill.setAttribute("aria-expanded", "true");
+            }
+            if (joinSection) {
+              joinSection.classList.add("guide-spotlight");
+            }
+            if (javaCard) {
+              javaCard.classList.add("guide-spotlight");
+            }
+            if (bedrockCard) {
+              bedrockCard.classList.add("guide-spotlight");
+            }
           }, 10);
         }
 
         function hideGuide() {
-          guide.classList.remove("show");
-          guide.setAttribute("aria-hidden", "true");
-          onlinePill.setAttribute("aria-expanded", "false");
-
-          joinSection.classList.remove("guide-spotlight");
-          if (javaCard) javaCard.classList.remove("guide-spotlight");
-          if (bedrockCard) bedrockCard.classList.remove("guide-spotlight");
-
-          onlinePill.focus({ preventScroll: true });
+          // Re-query elements each time to ensure they're found
+          const javaCard = document.getElementById("java-card");
+          const bedrockCard = document.getElementById("bedrock-card");
+          const joinSection = document.getElementById("join");
+          const onlinePill = document.getElementById("online-pill");
+          
+          if (guide) {
+            guide.classList.remove("show");
+            guide.setAttribute("aria-hidden", "true");
+          }
+          if (onlinePill) {
+            onlinePill.setAttribute("aria-expanded", "false");
+            onlinePill.focus({ preventScroll: true });
+          }
+          if (joinSection) {
+            joinSection.classList.remove("guide-spotlight");
+          }
+          if (javaCard) {
+            javaCard.classList.remove("guide-spotlight");
+          }
+          if (bedrockCard) {
+            bedrockCard.classList.remove("guide-spotlight");
+          }
         }
 
         guide.addEventListener("click", hideGuide);
@@ -1829,21 +1459,7 @@
           });
         }
 
-        // Handle online pill click separately with stopPropagation
-        if (onlinePill) {
-          onlinePill.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent event from bubbling to brand-link
-            showGuide();
-          });
-
-          onlinePill.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter" && e.key !== " ") return;
-            e.preventDefault();
-            e.stopPropagation();
-            showGuide();
-          });
-        }
+        // Online pill click handler is in js/common.js (runs after navbar is rendered)
 
         // Check for play parameter in URL and trigger guide
         const urlParams = new URLSearchParams(window.location.search);
