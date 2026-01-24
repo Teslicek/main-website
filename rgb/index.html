@@ -9,12 +9,6 @@
     <meta name="description" content="Generate RGB gradients for Minecraft. Create beautiful color transitions for text, signs, and more." />
     <link rel="canonical" href="https://www.lifestealsmp.com/rgb/" />
     <link rel="icon" href="../favicon.ico" sizes="any" />
-    
-    <!-- Preload Minecraft fonts for accurate preview rendering -->
-    <link rel="preload" href="fonts/MinecraftRegular.woff" as="font" type="font/woff" crossorigin />
-    <link rel="preload" href="fonts/MinecraftBold.woff" as="font" type="font/woff" crossorigin />
-    <link rel="preload" href="fonts/MinecraftItalic.woff" as="font" type="font/woff" crossorigin />
-    <link rel="preload" href="fonts/MinecraftBoldItalic.woff" as="font" type="font/woff" crossorigin />
 
     <style>
       /* Minecraft fonts from Birdflop */
@@ -1492,6 +1486,149 @@
         { r: 155, g: 255, b: 0, hex: '#9BFF00', position: 0 },
         { r: 0, g: 207, b: 255, hex: '#00CFFF', position: 100 }
       ];
+      
+      // Cache key for localStorage
+      const CACHE_KEY = 'rgb_tool_state_v1';
+      
+      // Validation functions
+      function isValidText(text) {
+        return typeof text === 'string' && text.length <= 24;
+      }
+      
+      function isValidFormatting(formatting) {
+        if (!formatting || typeof formatting !== 'object') return false;
+        const validKeys = ['bold', 'italic', 'underline', 'strikethrough'];
+        for (const key of validKeys) {
+          if (key in formatting && typeof formatting[key] !== 'boolean') {
+            return false;
+          }
+        }
+        // Check for unknown keys
+        for (const key in formatting) {
+          if (!validKeys.includes(key)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      
+      function isValidType(type) {
+        return type === 'none' || type === 'namecolor' || type === 'itemname';
+      }
+      
+      function isValidSmallFont(smallFont) {
+        return typeof smallFont === 'boolean';
+      }
+      
+      function isValidColorStop(stop) {
+        if (!stop || typeof stop !== 'object') return false;
+        if (typeof stop.r !== 'number' || stop.r < 0 || stop.r > 255) return false;
+        if (typeof stop.g !== 'number' || stop.g < 0 || stop.g > 255) return false;
+        if (typeof stop.b !== 'number' || stop.b < 0 || stop.b > 255) return false;
+        if (typeof stop.position !== 'number' || stop.position < 0 || stop.position > 100) return false;
+        if (typeof stop.hex !== 'string' || !/^#[0-9A-Fa-f]{6}$/.test(stop.hex)) return false;
+        return true;
+      }
+      
+      function isValidColors(colors) {
+        if (!Array.isArray(colors) || colors.length < 2) return false;
+        for (const stop of colors) {
+          if (!isValidColorStop(stop)) return false;
+        }
+        return true;
+      }
+      
+      // Save state to localStorage
+      function saveState() {
+        try {
+          const input = document.getElementById('input-text');
+          const formatBold = document.getElementById('format-bold');
+          const formatItalic = document.getElementById('format-italic');
+          const formatUnderline = document.getElementById('format-underline');
+          const formatStrikethrough = document.getElementById('format-strikethrough');
+          const formatSmall = document.getElementById('format-small');
+          const commandButtons = document.querySelectorAll('.command-switcher button');
+          
+          if (!input || !formatBold || !formatItalic || !formatUnderline || !formatStrikethrough || !formatSmall) {
+            return; // Skip save if elements not ready
+          }
+          
+          let selectedType = 'none';
+          commandButtons.forEach(btn => {
+            if (btn.classList.contains('active')) {
+              selectedType = btn.dataset.command || 'none';
+            }
+          });
+          
+          // Always save originalText, not input.value, so we preserve the original capitalization
+          // If small font is enabled, input.value is in small caps, but we want to save the original
+          const state = {
+            text: originalText || input.value || '',
+            formatting: {
+              bold: formatBold.checked || false,
+              italic: formatItalic.checked || false,
+              underline: formatUnderline.checked || false,
+              strikethrough: formatStrikethrough.checked || false
+            },
+            type: selectedType,
+            smallFont: formatSmall.checked || false,
+            colors: colorStops.map(stop => ({
+              r: stop.r,
+              g: stop.g,
+              b: stop.b,
+              hex: stop.hex,
+              position: stop.position
+            }))
+          };
+          
+          localStorage.setItem(CACHE_KEY, JSON.stringify(state));
+        } catch (err) {
+          // Silently fail - state saving is not critical
+        }
+      }
+      
+      // Load state from localStorage with validation
+      function loadState() {
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (!cached) return null;
+          
+          const state = JSON.parse(cached);
+          if (!state || typeof state !== 'object') return null;
+          
+          const result = {};
+          
+          // Validate and load text
+          if (isValidText(state.text)) {
+            result.text = state.text;
+          }
+          
+          // Validate and load formatting
+          if (isValidFormatting(state.formatting)) {
+            result.formatting = state.formatting;
+          }
+          
+          // Validate and load type
+          if (isValidType(state.type)) {
+            result.type = state.type;
+          }
+          
+          // Validate and load small font
+          if (isValidSmallFont(state.smallFont)) {
+            result.smallFont = state.smallFont;
+          }
+          
+          // Validate and load colors
+          if (isValidColors(state.colors)) {
+            result.colors = state.colors;
+          }
+          
+          return result;
+        } catch (err) {
+          // Silently fail - state loading is not critical
+          return null;
+        }
+      }
       let addedColorIndices = []; // Stack to track indices of added colors in order (most recent last)
 
       function rgbToHex(r, g, b) {
@@ -1641,10 +1778,7 @@
       // Lightweight preview update (only gradient background, no DOM manipulation)
       let gradientUpdateCount = 0;
       function updatePreviewGradient() {
-        gradientUpdateCount++;
-        if (gradientUpdateCount % 50 === 0) {
-          console.log(`[PERF DEBUG] updatePreviewGradient called ${gradientUpdateCount} times`);
-        }
+        // Update gradient background
         
         const preview = document.getElementById('gradient-preview');
         if (!preview) return;
@@ -1794,19 +1928,9 @@
             let cachedColorBlob = null;
             let previewWidth = 0;
             
-            // Debug tracking
-            let dragCount = 0;
-            let moveCount = 0;
-            const indicatorId = `indicator-${index}-${Date.now()}`;
-            console.log(`[INIT DEBUG] Created indicator ${indicatorId} for index ${index}`);
-            
             indicator.addEventListener('mousedown', (e) => {
               e.stopPropagation();
               e.preventDefault();
-              
-              dragCount++;
-              moveCount = 0;
-              console.log(`[DRAG DEBUG] ${indicatorId} - Drag #${dragCount} started`);
               
               // Blur any focused input fields to prevent keyboard input
               const activeElement = document.activeElement;
@@ -1833,7 +1957,6 @@
               // Add event listeners only when dragging starts (prevents accumulation)
               document.addEventListener('mousemove', handleMouseMove);
               document.addEventListener('mouseup', handleMouseUp);
-              console.log(`[DRAG DEBUG] ${indicatorId} - Added document listeners`);
               
               // Prevent keyboard input during drag
               keyboardHandler = (e) => {
@@ -1858,13 +1981,6 @@
               if (!isDragging) return;
               
               e.preventDefault();
-              moveCount++;
-              
-              // Log every 100 moves to track performance
-              if (moveCount % 100 === 0) {
-                console.log(`[PERF DEBUG] ${indicatorId} - Move #${moveCount}, Drag #${dragCount}`);
-                console.log(`[PERF DEBUG] RAF pending: ${rafId !== null}, Cache: ${sortedStopsCache ? sortedStopsCache.length : 0} stops`);
-              }
               
               // Use cached preview width (no expensive getBoundingClientRect on every move)
               const deltaX = e.clientX - startX;
@@ -1925,8 +2041,6 @@
                 indicator.style.cursor = 'grab';
                 hasDragged = false;
                 
-                console.log(`[DRAG DEBUG] ${indicatorId} - Drag #${dragCount} ended. Total moves: ${moveCount}`);
-                
                 // Ensure final updates are applied
                 if (rafId !== null) {
                   cancelAnimationFrame(rafId);
@@ -1942,6 +2056,7 @@
                 requestAnimationFrame(() => {
                   updateOutput();
                   updateTextPreview();
+                  saveState(); // Save state after drag ends
                 });
                 
                 // Remove keyboard event handlers
@@ -1955,7 +2070,6 @@
                 // Remove mouse event listeners to prevent accumulation
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
-                console.log(`[DRAG DEBUG] ${indicatorId} - Removed document listeners`);
               }
             };
             
@@ -1969,6 +2083,7 @@
 
       // Store original text (before small caps conversion) to preserve capitalization
       let originalText = 'Hello World';
+      let isInitializing = false; // Flag to prevent change event from overwriting originalText during initialization
 
       function toSmallCaps(text) {
         const smallCapsMap = {
@@ -1988,9 +2103,11 @@
         const reverseMap = {
           'ᴀ': 'A', 'ʙ': 'B', 'ᴄ': 'C', 'ᴅ': 'D', 'ᴇ': 'E', 'ꜰ': 'F', 'ɢ': 'G', 'ʜ': 'H',
           'ɪ': 'I', 'ᴊ': 'J', 'ᴋ': 'K', 'ʟ': 'L', 'ᴍ': 'M', 'ɴ': 'N', 'ᴏ': 'O', 'ᴘ': 'P',
-          'ꞯ': 'Q', 'ʀ': 'R', 's': 'S', 'ᴛ': 'T', 'ᴜ': 'U', 'ᴠ': 'V', 'ᴡ': 'W', 'x': 'X',
+          'ꞯ': 'Q', 'ʀ': 'R', 's': 's', 'ᴛ': 'T', 'ᴜ': 'U', 'ᴠ': 'V', 'ᴡ': 'W', 'x': 'x',
           'ʏ': 'Y', 'ᴢ': 'Z'
         };
+        // Note: 's' and 'x' don't have small caps Unicode variants, so they stay as lowercase
+        // in both toSmallCaps and fromSmallCaps
         return text.split('').map(char => reverseMap[char] || char).join('');
       }
 
@@ -2042,22 +2159,37 @@
           // Handle spaces - apply both color and formatting codes
           if (char === ' ') {
             // Find which color stops to interpolate between based on position
+            // CSS gradients extend first/last colors to edges, so we do the same
             let lowerIndex = 0;
             let upperIndex = sortedStops.length - 1;
+            let t = 0;
             
-            for (let j = 0; j < sortedStops.length - 1; j++) {
-              if (progress >= sortedStops[j].position && progress <= sortedStops[j + 1].position) {
-                lowerIndex = j;
-                upperIndex = j + 1;
-                break;
+            // If progress is before first stop, use first stop color
+            if (progress <= sortedStops[0].position) {
+              lowerIndex = 0;
+              upperIndex = 0;
+              t = 0;
+            }
+            // If progress is after last stop, use last stop color
+            else if (progress >= sortedStops[sortedStops.length - 1].position) {
+              lowerIndex = sortedStops.length - 1;
+              upperIndex = sortedStops.length - 1;
+              t = 0;
+            }
+            // Otherwise, find the segment and interpolate
+            else {
+              for (let j = 0; j < sortedStops.length - 1; j++) {
+                if (progress >= sortedStops[j].position && progress <= sortedStops[j + 1].position) {
+                  lowerIndex = j;
+                  upperIndex = j + 1;
+                  const lowerPos = sortedStops[lowerIndex].position;
+                  const upperPos = sortedStops[upperIndex].position;
+                  const range = upperPos - lowerPos;
+                  t = range > 0 ? (progress - lowerPos) / range : 0;
+                  break;
+                }
               }
             }
-            
-            // Calculate interpolation factor
-            const lowerPos = sortedStops[lowerIndex].position;
-            const upperPos = sortedStops[upperIndex].position;
-            const range = upperPos - lowerPos;
-            const t = range > 0 ? (progress - lowerPos) / range : 0;
 
             // Interpolate between colors for the space
             const lowerColor = sortedStops[lowerIndex];
@@ -2083,23 +2215,38 @@
           const nonSpaceProgress = nonSpaceChars > 1 ? (nonSpaceIndex / (nonSpaceChars - 1)) * 100 : 0;
           nonSpaceIndex++;
           
-          // Find which color stops to interpolate between based on position (using non-space progress)
+          // Find which color stops to interpolate between based on position
+          // CSS gradients extend first/last colors to edges, so we do the same
           let lowerIndex = 0;
           let upperIndex = sortedStops.length - 1;
+          let t = 0;
           
-          for (let j = 0; j < sortedStops.length - 1; j++) {
-            if (nonSpaceProgress >= sortedStops[j].position && nonSpaceProgress <= sortedStops[j + 1].position) {
-              lowerIndex = j;
-              upperIndex = j + 1;
-              break;
+          // If progress is before first stop, use first stop color
+          if (nonSpaceProgress <= sortedStops[0].position) {
+            lowerIndex = 0;
+            upperIndex = 0;
+            t = 0;
+          }
+          // If progress is after last stop, use last stop color
+          else if (nonSpaceProgress >= sortedStops[sortedStops.length - 1].position) {
+            lowerIndex = sortedStops.length - 1;
+            upperIndex = sortedStops.length - 1;
+            t = 0;
+          }
+          // Otherwise, find the segment and interpolate
+          else {
+            for (let j = 0; j < sortedStops.length - 1; j++) {
+              if (nonSpaceProgress >= sortedStops[j].position && nonSpaceProgress <= sortedStops[j + 1].position) {
+                lowerIndex = j;
+                upperIndex = j + 1;
+                const lowerPos = sortedStops[lowerIndex].position;
+                const upperPos = sortedStops[upperIndex].position;
+                const range = upperPos - lowerPos;
+                t = range > 0 ? (nonSpaceProgress - lowerPos) / range : 0;
+                break;
+              }
             }
           }
-          
-          // Calculate interpolation factor
-          const lowerPos = sortedStops[lowerIndex].position;
-          const upperPos = sortedStops[upperIndex].position;
-          const range = upperPos - lowerPos;
-          const t = range > 0 ? (nonSpaceProgress - lowerPos) / range : 0;
 
           // Interpolate between colors
           const lowerColor = sortedStops[lowerIndex];
@@ -2190,27 +2337,52 @@
           let t = 0;
           
           if (char === ' ') {
-            for (let j = 0; j < sortedStops.length - 1; j++) {
-              if (progress >= sortedStops[j].position && progress <= sortedStops[j + 1].position) {
-                lowerIndex = j;
-                upperIndex = j + 1;
-                break;
+            // Find which color stops to interpolate between based on position
+            // CSS gradients extend first/last colors to edges, so we do the same
+            if (progress <= sortedStops[0].position) {
+              lowerIndex = 0;
+              upperIndex = 0;
+              t = 0;
+            } else if (progress >= sortedStops[sortedStops.length - 1].position) {
+              lowerIndex = sortedStops.length - 1;
+              upperIndex = sortedStops.length - 1;
+              t = 0;
+            } else {
+              for (let j = 0; j < sortedStops.length - 1; j++) {
+                if (progress >= sortedStops[j].position && progress <= sortedStops[j + 1].position) {
+                  lowerIndex = j;
+                  upperIndex = j + 1;
+                  const range = sortedStops[upperIndex].position - sortedStops[lowerIndex].position;
+                  t = range > 0 ? (progress - sortedStops[lowerIndex].position) / range : 0;
+                  break;
+                }
               }
             }
-            const range = sortedStops[upperIndex].position - sortedStops[lowerIndex].position;
-            t = range > 0 ? (progress - sortedStops[lowerIndex].position) / range : 0;
           } else {
             const nonSpaceProgress = nonSpaceChars > 1 ? (nonSpaceIndex / (nonSpaceChars - 1)) * 100 : 0;
             nonSpaceIndex++;
-            for (let j = 0; j < sortedStops.length - 1; j++) {
-              if (nonSpaceProgress >= sortedStops[j].position && nonSpaceProgress <= sortedStops[j + 1].position) {
-                lowerIndex = j;
-                upperIndex = j + 1;
-                break;
+            
+            // Find which color stops to interpolate between based on position
+            // CSS gradients extend first/last colors to edges, so we do the same
+            if (nonSpaceProgress <= sortedStops[0].position) {
+              lowerIndex = 0;
+              upperIndex = 0;
+              t = 0;
+            } else if (nonSpaceProgress >= sortedStops[sortedStops.length - 1].position) {
+              lowerIndex = sortedStops.length - 1;
+              upperIndex = sortedStops.length - 1;
+              t = 0;
+            } else {
+              for (let j = 0; j < sortedStops.length - 1; j++) {
+                if (nonSpaceProgress >= sortedStops[j].position && nonSpaceProgress <= sortedStops[j + 1].position) {
+                  lowerIndex = j;
+                  upperIndex = j + 1;
+                  const range = sortedStops[upperIndex].position - sortedStops[lowerIndex].position;
+                  t = range > 0 ? (nonSpaceProgress - sortedStops[lowerIndex].position) / range : 0;
+                  break;
+                }
               }
             }
-            const range = sortedStops[upperIndex].position - sortedStops[lowerIndex].position;
-            t = range > 0 ? (nonSpaceProgress - sortedStops[lowerIndex].position) / range : 0;
           }
           
           const lowerColor = sortedStops[lowerIndex];
@@ -2242,10 +2414,7 @@
 
       let outputUpdateCount = 0;
       function updateOutput() {
-        outputUpdateCount++;
-        if (outputUpdateCount % 50 === 0) {
-          console.log(`[PERF DEBUG] updateOutput called ${outputUpdateCount} times, isDraggingAny: ${isDraggingAny}`);
-        }
+        // Generate and update output
         
         const output = document.getElementById('output-code');
         output.textContent = generateCode();
@@ -2366,6 +2535,7 @@
           }
           
           updateOutput();
+          saveState(); // Save state when color changes
         }
 
         let isDraggingSquare = false;
@@ -2412,6 +2582,7 @@
           hueHandle.style.top = huePercent + '%';
           
           updateOutput();
+          saveState(); // Save state when color changes
         };
 
         pickerSquare.addEventListener('mousedown', (e) => {
@@ -2600,6 +2771,7 @@
             if (removeColorBtn) {
               removeColorBtn.disabled = colorStops.length <= 2;
             }
+            saveState(); // Save state when color is removed
           }
         });
 
@@ -2842,6 +3014,7 @@
           updateOutput();
           updateTextPreview();
           updateRemoveButtonState();
+          saveState(); // Save state when color is added via [+] button
         });
       }
 
@@ -2895,6 +3068,7 @@
           btn.classList.add('active');
           btn.setAttribute('aria-selected', 'true');
           updateOutput();
+          saveState(); // Save state when command type changes
         });
       });
 
@@ -2913,17 +3087,29 @@
 
       // Store the last typed character/data before conversion (for small font)
       let lastTypedData = null;
+      let oldInputValue = null;
 
       // Text input and formatting options
       // Use beforeinput to capture the character/data before it's converted
       document.getElementById('input-text').addEventListener('beforeinput', (e) => {
         const formatSmall = document.getElementById('format-small').checked;
+        const input = e.target;
+        
+        // Store the old value BEFORE the browser modifies it
+        oldInputValue = input.value;
+        
         if (formatSmall && (e.inputType === 'insertText' || e.inputType === 'insertCompositionText')) {
           // Store the character/data that's about to be inserted (before conversion)
-          lastTypedData = e.data;
+          // e.data contains the text that will be inserted
+          if (e.data !== null && e.data !== undefined) {
+            lastTypedData = e.data;
+          }
         } else if (formatSmall && e.inputType === 'insertFromPaste') {
           // For paste, we'll handle it in the input event
           lastTypedData = null; // Will use fallback
+        } else if (!formatSmall) {
+          // Clear lastTypedData when small font is disabled
+          lastTypedData = null;
         }
       });
 
@@ -2931,47 +3117,148 @@
         const formatSmall = document.getElementById('format-small').checked;
         const input = e.target;
         const cursorPos = input.selectionStart;
-        const oldValue = input.value;
+        const selectionEnd = input.selectionEnd || cursorPos;
+        // Use stored old value from beforeinput, fallback to current if not set
+        // But if oldInputValue is null/undefined, we need to calculate it differently
+        let oldValue;
+        const wasOldValueSet = oldInputValue !== null && oldInputValue !== undefined;
+        if (wasOldValueSet) {
+          oldValue = oldInputValue;
+        } else {
+          // Fallback: try to infer old value from current value and lastTypedData
+          if (lastTypedData && lastTypedData.length > 0 && input.value.length >= lastTypedData.length) {
+            // If we have lastTypedData, the old value should be current value minus what was typed
+            const insertPos = cursorPos - lastTypedData.length;
+            if (insertPos >= 0) {
+              oldValue = input.value.slice(0, insertPos) + input.value.slice(cursorPos);
+            } else {
+              oldValue = input.value;
+            }
+          } else {
+            oldValue = input.value; // Last resort
+          }
+        }
+        oldInputValue = null; // Clear after use
         
         if (formatSmall) {
           // When small font is enabled, we need to:
           // 1. Update originalText with the actual character/data typed (stored in lastTypedData)
           // 2. Convert the entire text to small caps
           
+          // Ensure originalText is initialized and synced with input value
+          if (typeof originalText === 'undefined' || originalText === null) {
+            originalText = fromSmallCaps(input.value) || '';
+          }
+          
+          // If input is empty, ensure originalText is also empty
+          if (input.value === '' && originalText !== '') {
+            originalText = '';
+          }
+          
           const oldLength = oldValue.length;
           const newLength = input.value.length;
           
-          if (newLength < oldLength) {
-            // Text was deleted
+          // Check if this is a replacement (selected text was replaced with new text)
+          // This happens when: oldLength > newLength AND we have lastTypedData
+          const isReplacement = oldLength > newLength && lastTypedData !== null && lastTypedData !== undefined && lastTypedData.length > 0;
+          
+          if (isReplacement) {
+            // Selected text was replaced with new text
+            // Calculate how many characters were selected and replaced
+            // oldLength - newLength = net characters removed
+            // But we're adding lastTypedData.length characters, so:
+            // deletedCount = oldLength - newLength + lastTypedData.length
+            const deletedCount = oldLength - newLength + lastTypedData.length;
+            // The replacement happened at cursorPos - lastTypedData.length (where the selection started)
+            const replaceStart = cursorPos - lastTypedData.length;
+            if (replaceStart >= 0 && replaceStart < originalText.length) {
+              // Replace the selected portion with the new text
+              originalText = originalText.slice(0, replaceStart) + lastTypedData + originalText.slice(replaceStart + deletedCount);
+              lastTypedData = null; // Reset after use
+            } else {
+              // Fallback: reconstruct from input
+              originalText = fromSmallCaps(input.value) || '';
+            }
+          } else if (newLength < oldLength) {
+            // Text was deleted (no replacement, just deletion)
             const deleteStart = Math.min(cursorPos, oldLength - 1);
             const deleteCount = oldLength - newLength;
             originalText = originalText.slice(0, deleteStart) + originalText.slice(deleteStart + deleteCount);
-          } else if (newLength > oldLength && lastTypedData !== null) {
-            // Text was added - use the stored original character/data
-            const insertPos = Math.min(cursorPos - lastTypedData.length, oldLength);
-            originalText = originalText.slice(0, insertPos) + lastTypedData + originalText.slice(insertPos);
-            lastTypedData = null; // Reset after use
-          } else if (newLength === oldLength && lastTypedData !== null && lastTypedData.length === 1) {
-            // Single character was replaced
-            const replacePos = Math.min(cursorPos - 1, oldLength - 1);
-            if (replacePos >= 0) {
-              originalText = originalText.slice(0, replacePos) + lastTypedData + originalText.slice(replacePos + 1);
+          } else if (newLength > oldLength) {
+            // Text was added (insertion)
+            // Special case: if input was empty and now has text, start fresh
+            // Check both oldLength === 0 and if oldValue was explicitly set to empty string
+            if (oldLength === 0 || (wasOldValueSet && oldValue === '')) {
+              // Input was empty, so originalText should also be empty
+              originalText = '';
+              // If we have lastTypedData, use it directly; otherwise reconstruct from input
+              if (lastTypedData !== null && lastTypedData !== undefined && lastTypedData.length > 0) {
+                originalText = lastTypedData;
+                lastTypedData = null;
+              } else {
+                // Fallback: reconstruct from input value
+                // For empty input, the input.value should be the character that was just typed
+                // But it might already be in small caps, so we need to convert it back
+                originalText = fromSmallCaps(input.value) || '';
+                // If fromSmallCaps returns empty (because input.value is already small caps and not in our map),
+                // we need to use the input value directly as a fallback
+                if (originalText === '' && input.value.length > 0) {
+                  // The input value might be the small caps version, but we don't have a reverse map for it
+                  // So we'll use the input value as-is and hope it's correct
+                  originalText = input.value;
+                }
+              }
+            } else {
+              // Normal insertion into existing text
+              if (lastTypedData !== null && lastTypedData.length > 0) {
+                // Use the stored original character/data
+                // cursorPos is AFTER the inserted character, so subtract its length to get insert position
+                const insertPos = cursorPos - lastTypedData.length;
+                if (insertPos >= 0 && insertPos <= originalText.length) {
+                  // Insert the character at the correct position
+                  originalText = originalText.slice(0, insertPos) + lastTypedData + originalText.slice(insertPos);
+                } else {
+                  // If insert position is invalid, fall back to reconstructing from input
+                  originalText = fromSmallCaps(input.value) || '';
+                }
+                lastTypedData = null; // Reset after use
+              } else {
+                // Fallback: lastTypedData is null or empty, reconstruct from current input value
+                // This happens if beforeinput didn't fire or didn't capture the data
+                originalText = fromSmallCaps(input.value) || '';
+              }
             }
-            lastTypedData = null; // Reset after use
+          } else if (newLength === oldLength) {
+            // Same length - could be replacement or no change
+            if (lastTypedData !== null && lastTypedData.length === 1) {
+              // Single character was replaced
+              const replacePos = cursorPos - 1;
+              if (replacePos >= 0 && replacePos < originalText.length) {
+                originalText = originalText.slice(0, replacePos) + lastTypedData + originalText.slice(replacePos + 1);
+              }
+              lastTypedData = null; // Reset after use
+            } else {
+              // No change or complex operation, reconstruct from input
+              originalText = fromSmallCaps(input.value) || '';
+            }
           } else {
             // Fallback: if we don't have lastTypedData or it's a complex operation (paste, etc.)
             // Try to reconstruct from small caps (best effort)
-            originalText = fromSmallCaps(input.value);
+            originalText = fromSmallCaps(input.value) || '';
           }
           
           // Convert originalText to small caps for display
           const convertedValue = toSmallCaps(originalText);
-          if (input.value !== convertedValue) {
-            const newCursorPos = Math.min(cursorPos, convertedValue.length);
-            input.value = convertedValue;
-            // Restore cursor position
-            input.setSelectionRange(newCursorPos, newCursorPos);
-          }
+          // Always update the input value to ensure it matches the converted value
+          // This is especially important when starting from empty input
+          const newCursorPos = Math.min(cursorPos, convertedValue.length);
+          input.value = convertedValue;
+          // Restore cursor position immediately using requestAnimationFrame for better synchronization
+          requestAnimationFrame(() => {
+            // Double-check cursor position is still valid
+            const finalCursorPos = Math.min(newCursorPos, input.value.length);
+            input.setSelectionRange(finalCursorPos, finalCursorPos);
+          });
         } else {
           // When small font is disabled, just update originalText directly
           originalText = input.value;
@@ -2980,6 +3267,7 @@
         updateCharCounter();
         updateOutput();
         updateTextPreview();
+        saveState(); // Save state when text changes
       });
       document.getElementById('format-bold').addEventListener('change', () => {
         // Wait for fonts to be ready, then update
@@ -2988,12 +3276,14 @@
             requestAnimationFrame(() => {
               updateOutput();
               updateTextPreview();
+              saveState(); // Save state when formatting changes
             });
           });
         } else {
           requestAnimationFrame(() => {
             updateOutput();
             updateTextPreview();
+            saveState(); // Save state when formatting changes
           });
         }
       });
@@ -3004,38 +3294,72 @@
             requestAnimationFrame(() => {
               updateOutput();
               updateTextPreview();
+              saveState(); // Save state when formatting changes
             });
           });
         } else {
           requestAnimationFrame(() => {
             updateOutput();
             updateTextPreview();
+            saveState(); // Save state when formatting changes
           });
         }
       });
       document.getElementById('format-underline').addEventListener('change', () => {
         updateOutput();
         updateTextPreview();
+        saveState(); // Save state when formatting changes
       });
       document.getElementById('format-strikethrough').addEventListener('change', () => {
         updateOutput();
         updateTextPreview();
+        saveState(); // Save state when formatting changes
       });
       document.getElementById('format-small').addEventListener('change', () => {
+        // Skip processing during initialization to avoid overwriting originalText
+        if (isInitializing) return;
+        
         const input = document.getElementById('input-text');
         if (input) {
           const formatSmall = document.getElementById('format-small').checked;
           if (formatSmall) {
             // When enabling small font: save current text as original, then convert
-            originalText = input.value;
+            // Check if input.value is already in small caps - if so, convert it back first
+            const convertedBack = fromSmallCaps(input.value);
+            if (convertedBack !== input.value && convertedBack.length === input.value.length) {
+              // input.value is in small caps, use the converted version as originalText
+              originalText = convertedBack;
+            } else {
+              // input.value is not in small caps, use it directly as originalText
+              originalText = input.value;
+            }
             input.value = toSmallCaps(originalText);
           } else {
             // When disabling small font: restore from originalText
-            input.value = originalText;
+            // Ensure originalText is not in small caps format - convert back if needed
+            if (originalText) {
+              const convertedBack = fromSmallCaps(originalText);
+              // If conversion changed the text, originalText was in small caps, use converted version
+              if (convertedBack !== originalText && convertedBack.length === originalText.length) {
+                originalText = convertedBack;
+                input.value = originalText;
+              } else {
+                // originalText is already in original format, use it directly
+                input.value = originalText;
+              }
+            } else {
+              // Fallback: try to convert input.value back from small caps
+              const convertedBack = fromSmallCaps(input.value);
+              if (convertedBack !== input.value && convertedBack.length === input.value.length) {
+                originalText = convertedBack;
+                input.value = originalText;
+              }
+            }
           }
         }
         updateOutput();
         updateTextPreview();
+        saveState(); // Save state when small font changes
       });
 
 
@@ -3100,13 +3424,18 @@
       }
 
       function initialize() {
-        // Parse URL parameters
+        // Parse URL parameters (URL params take precedence over cache)
         const urlParams = new URLSearchParams(window.location.search);
         const textParam = urlParams.get('text');
         const typeParam = urlParams.get('type');
         
-        // Ensure colorStops is initialized before anything else
-        if (!colorStops || colorStops.length < 2) {
+        // Load cached state (if no URL params override)
+        const cachedState = loadState();
+        
+        // Initialize colorStops from cache or defaults
+        if (cachedState && cachedState.colors) {
+          colorStops = cachedState.colors;
+        } else if (!colorStops || colorStops.length < 2) {
           colorStops = [
             { r: 155, g: 255, b: 0, hex: '#9BFF00', position: 0 },
             { r: 0, g: 207, b: 255, hex: '#00CFFF', position: 100 }
@@ -3115,24 +3444,44 @@
         renderColorStops();
         updateCharCounter();
         
-        // Set text from URL parameter if provided
-        if (textParam) {
-          const input = document.getElementById('input-text');
-          if (input) {
+        // Set text from URL parameter (takes precedence) or cache
+        const input = document.getElementById('input-text');
+        if (input) {
+          if (textParam) {
             const decodedText = decodeURIComponent(textParam);
-            // Truncate to 24 characters (maxlength limit)
             const truncatedText = decodedText.substring(0, 24);
             input.value = truncatedText;
             originalText = truncatedText;
-            updateCharCounter();
+          } else if (cachedState && cachedState.text !== undefined) {
+            // We now save originalText to cache, so the cached text is always the original
+            originalText = cachedState.text;
+            // If small font was enabled, convert to small caps for display
+            if (cachedState.smallFont === true) {
+              input.value = toSmallCaps(originalText);
+            } else {
+              input.value = originalText;
+            }
           }
+          updateCharCounter();
         }
         
-        // Set switcher from URL parameter if provided
+        // Set formatting from cache (URL params don't override formatting)
+        if (cachedState && cachedState.formatting) {
+          const formatBold = document.getElementById('format-bold');
+          const formatItalic = document.getElementById('format-italic');
+          const formatUnderline = document.getElementById('format-underline');
+          const formatStrikethrough = document.getElementById('format-strikethrough');
+          
+          if (formatBold) formatBold.checked = cachedState.formatting.bold || false;
+          if (formatItalic) formatItalic.checked = cachedState.formatting.italic || false;
+          if (formatUnderline) formatUnderline.checked = cachedState.formatting.underline || false;
+          if (formatStrikethrough) formatStrikethrough.checked = cachedState.formatting.strikethrough || false;
+        }
+        
+        // Set type from URL parameter (takes precedence) or cache
+        let commandToSelect = 'none';
         if (typeParam) {
           const decodedType = decodeURIComponent(typeParam);
-          let commandToSelect = 'none';
-          
           if (decodedType === '/namecolor' || decodedType === 'namecolor') {
             commandToSelect = 'namecolor';
           } else if (decodedType === '/itemname' || decodedType === 'itemname') {
@@ -3140,18 +3489,33 @@
           } else if (decodedType === 'none' || decodedType === 'chat') {
             commandToSelect = 'none';
           }
-          
-          const buttons = document.querySelectorAll('.command-switcher button');
-          buttons.forEach(btn => {
-            if (btn.dataset.command === commandToSelect) {
-              btn.classList.add('active');
-              btn.setAttribute('aria-selected', 'true');
-            } else {
-              btn.classList.remove('active');
-              btn.setAttribute('aria-selected', 'false');
-            }
-          });
+        } else if (cachedState && cachedState.type) {
+          commandToSelect = cachedState.type;
         }
+        
+        const buttons = document.querySelectorAll('.command-switcher button');
+        buttons.forEach(btn => {
+          if (btn.dataset.command === commandToSelect) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+          } else {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+          }
+        });
+        
+        // Set small font from cache (must be done after text is loaded)
+        // Use a flag to prevent the change event from overwriting originalText during initialization
+        isInitializing = true;
+        if (cachedState && cachedState.smallFont !== undefined) {
+          const formatSmall = document.getElementById('format-small');
+          if (formatSmall) {
+            formatSmall.checked = cachedState.smallFont;
+            // Note: If small font was enabled, the text is already in small caps in input.value
+            // and originalText has been set correctly above, so no conversion needed here
+          }
+        }
+        isInitializing = false;
         
         // Update gradient preview immediately (doesn't depend on fonts)
         updatePreview();
