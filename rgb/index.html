@@ -1704,6 +1704,11 @@
 
       // Global function to close all pickers
       function closeAllPickers() {
+        // Don't close pickers if we're currently dragging in one
+        if (isDraggingInPicker) {
+          return;
+        }
+        
         document.querySelectorAll('.custom-color-picker.active').forEach(picker => {
           picker.classList.remove('active');
           picker.style.display = 'none';
@@ -1715,59 +1720,111 @@
             }
           }
         });
+        // Also remove any inactive pickers from document.body to prevent duplicate IDs
+        // This ensures pickers are cleaned up even if they weren't properly closed
+        // BUT: Only remove if we're not dragging, to avoid closing active pickers
+        if (!isDraggingInPicker) {
+          document.body.querySelectorAll('.custom-color-picker').forEach(picker => {
+            if (!picker.classList.contains('active')) {
+              picker.remove();
+            }
+          });
+        }
       }
 
       let isDraggingInPicker = false;
       let preventClickClose = false;
+      let draggingPickerIndex = null;
+      let lastMouseDownTime = 0;
+      let lastMouseDownTarget = null;
 
+      // SINGLE mouseup handler
       document.addEventListener('mouseup', (e) => {
         if (isDraggingInPicker) {
           preventClickClose = true;
+          isDraggingInPicker = false;
           setTimeout(() => {
             preventClickClose = false;
-            isDraggingInPicker = false;
-          }, 100);
+          }, 300);
         }
       });
+
       document.addEventListener('click', (e) => {
-        // Don't close if we just finished dragging in a picker
         if (preventClickClose) {
           return;
         }
         
-        // Check if click is outside any active picker
+        if (isDraggingInPicker) {
+          return;
+        }
+        
         const activePickers = document.querySelectorAll('.custom-color-picker.active');
-        if (activePickers.length > 0) {
-          let clickedInsidePicker = false;
-          activePickers.forEach(picker => {
-            if (picker.contains(e.target)) {
+        if (activePickers.length === 0) {
+          return;
+        }
+        
+        let clickedInsidePicker = false;
+        const path = e.composedPath ? e.composedPath() : [];
+        
+        for (let i = 0; i < path.length; i++) {
+          const element = path[i];
+          if (!element || typeof element.nodeType === 'undefined') continue;
+          
+          if (element.classList && element.classList.contains('custom-color-picker') && element.classList.contains('active')) {
+            clickedInsidePicker = true;
+            break;
+          }
+          
+          if (element.nodeType === 1) {
+            for (let j = 0; j < activePickers.length; j++) {
+              try {
+                if (activePickers[j].contains(element)) {
+                  clickedInsidePicker = true;
+                  break;
+                }
+              } catch (err) {
+                // Ignore errors
+              }
+            }
+          }
+          if (clickedInsidePicker) break;
+        }
+        
+        if (!clickedInsidePicker && e.target && e.target.nodeType === 1) {
+          for (let i = 0; i < activePickers.length; i++) {
+            try {
+              if (activePickers[i].contains(e.target)) {
+                clickedInsidePicker = true;
+                break;
+              }
+            } catch (err) {
+              // Ignore errors
+            }
+          }
+        }
+        
+        const timeSinceMouseDown = lastMouseDownTime ? Date.now() - lastMouseDownTime : Infinity;
+        if (timeSinceMouseDown < 350) {
+          for (let i = 0; i < activePickers.length; i++) {
+            if (activePickers[i].dataset.interacting === 'true') {
               clickedInsidePicker = true;
+              break;
             }
-          });
-          
-          // Also check if click is on a color blob (to allow opening/toggling)
-          // But skip if we just closed it (prevent immediate reopening)
-          if (e.target.classList.contains('gradient-color-blob')) {
-            if (e.target.dataset.justClosed === 'true') {
-              // We just closed this picker, don't reopen it
-              e.target.dataset.justClosed = 'false'; // Clear the flag
-              return;
-            }
-            clickedInsidePicker = true;
           }
-          
-          // Don't close if clicking on add/remove buttons (they handle their own logic)
-          // Note: gradient indicators now close pickers in their own click handler
-          if (e.target.classList.contains('gradient-add-btn') ||
-              e.target.classList.contains('gradient-remove-btn') ||
-              e.target.closest('.gradient-add-btn') ||
-              e.target.closest('.gradient-remove-btn')) {
-            clickedInsidePicker = true;
-          }
-          
-          if (!clickedInsidePicker) {
-            closeAllPickers();
-          }
+        }
+        
+        const isColorBlob = e.target && e.target.classList && e.target.classList.contains('gradient-color-blob');
+        const isAddBtn = (e.target && e.target.classList && e.target.classList.contains('gradient-add-btn')) || 
+                         (e.target && e.target.closest && e.target.closest('.gradient-add-btn'));
+        const isRemoveBtn = (e.target && e.target.classList && e.target.classList.contains('gradient-remove-btn')) || 
+                            (e.target && e.target.closest && e.target.closest('.gradient-remove-btn'));
+        
+        if (isColorBlob || isAddBtn || isRemoveBtn) {
+          clickedInsidePicker = true;
+        }
+        
+        if (!clickedInsidePicker) {
+          closeAllPickers();
         }
       });
 
@@ -1845,73 +1902,78 @@
               e.stopImmediatePropagation(); // Prevent global click handler from running
               e.preventDefault();
               
-              // Check if picker for this index is already active by looking at all active pickers
-              const activePickers = document.querySelectorAll('.custom-color-picker.active');
-              let activePickerForThisIndex = null;
-              
-              activePickers.forEach(picker => {
-                // Check if this picker belongs to the clicked index
-                // The picker might be in body or in the color-stops container
-                let pickerIndex = null;
-                const colorStopParent = picker.closest('.color-stop');
-                if (colorStopParent) {
-                  pickerIndex = colorStopParent.dataset.index;
-                } else {
-                  // If picker is in body, we need to find its index another way
-                  // Check all color-stop elements to see which one contains this picker's original parent
-                  const allColorStops = document.querySelectorAll('.color-stop');
-                  allColorStops.forEach(stop => {
-                    const stopPicker = stop.querySelector('.custom-color-picker');
-                    if (stopPicker === picker || (picker.dataset.originalParent === 'color-stops' && stop.contains(picker))) {
-                      pickerIndex = stop.dataset.index;
-                    }
-                  });
-                }
-                
-                if (pickerIndex === String(index)) {
-                  activePickerForThisIndex = picker;
-                }
-              });
+              // Check if picker for this index is already active using data-color-index attribute
+              const activePickerForThisIndex = document.querySelector(`.custom-color-picker[data-color-index="${index}"].active`);
               
               if (activePickerForThisIndex) {
+                // Picker is already open for this blob - close it
                 closeAllPickers();
                 colorBlob.dataset.justClosed = 'true';
                 setTimeout(() => {
                   if (colorBlob?.dataset) colorBlob.dataset.justClosed = 'false';
                 }, 200);
-                e.stopPropagation();
-                e.stopImmediatePropagation();
                 return;
               }
               
-              renderColorStops();
-              const updatedColorStopElement = document.querySelector(`.color-stop[data-index="${index}"]`);
-              if (updatedColorStopElement) {
-                const updatedPicker = updatedColorStopElement.querySelector('.custom-color-picker');
-                if (updatedPicker) {
-                  closeAllPickers();
-                  setTimeout(() => {
-                    const blobRect = colorBlob.getBoundingClientRect();
-                    if (!updatedPicker.dataset.originalParent) {
-                      const colorStopsContainer = document.getElementById('color-stops');
-                      if (colorStopsContainer?.contains(updatedPicker)) {
-                        updatedPicker.dataset.originalParent = 'color-stops';
-                      }
-                    }
-                    if (updatedPicker.parentElement !== document.body) {
-                      document.body.appendChild(updatedPicker);
-                    }
-                    updatedPicker.style.position = 'fixed';
-                    updatedPicker.style.display = 'block';
-                    updatedPicker.style.visibility = 'visible';
-                    const pickerWidth = 280;
-                    const leftPos = blobRect.left + blobRect.width / 2 - pickerWidth / 2;
-                    updatedPicker.style.left = Math.max(8, Math.min(window.innerWidth - pickerWidth - 8, leftPos)) + 'px';
-                    updatedPicker.style.top = (blobRect.bottom + 8) + 'px';
-                    updatedPicker.style.zIndex = '10000';
-                    updatedPicker.classList.add('active');
-                  }, 10);
+              // Close any other open pickers FIRST
+              closeAllPickers();
+              
+              // Wait a bit for closeAllPickers to complete, then find and open the picker
+              setTimeout(() => {
+                let existingPicker = document.querySelector(`.custom-color-picker[data-color-index="${index}"]`);
+                
+                if (!existingPicker) {
+                  const colorStopElement = document.querySelector(`.color-stop[data-index="${index}"]`);
+                  if (colorStopElement) {
+                    existingPicker = colorStopElement.querySelector('.custom-color-picker');
+                  }
                 }
+                
+                if (!existingPicker) {
+                  renderColorStops();
+                  existingPicker = document.querySelector(`.custom-color-picker[data-color-index="${index}"]`);
+                }
+                
+                if (existingPicker) {
+                  requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                      const blobRect = colorBlob.getBoundingClientRect();
+                      
+                      if (blobRect.width === 0 && blobRect.height === 0) {
+                        setTimeout(() => {
+                          const retryRect = colorBlob.getBoundingClientRect();
+                          if (retryRect.width > 0 || retryRect.height > 0) {
+                            positionPicker(existingPicker, colorBlob, retryRect);
+                          }
+                        }, 50);
+                        return;
+                      }
+                      
+                      positionPicker(existingPicker, colorBlob, blobRect);
+                    });
+                  });
+                }
+              }, 50);
+              
+              function positionPicker(picker, blob, blobRect) {
+                if (!picker.dataset.originalParent) {
+                  const colorStopsContainer = document.getElementById('color-stops');
+                  if (colorStopsContainer?.contains(picker)) {
+                    picker.dataset.originalParent = 'color-stops';
+                  }
+                }
+                if (picker.parentElement !== document.body) {
+                  document.body.appendChild(picker);
+                }
+                picker.style.position = 'fixed';
+                picker.style.display = 'block';
+                picker.style.visibility = 'visible';
+                const pickerWidth = 280;
+                const leftPos = blobRect.left + blobRect.width / 2 - pickerWidth / 2;
+                picker.style.left = Math.max(8, Math.min(window.innerWidth - pickerWidth - 8, leftPos)) + 'px';
+                picker.style.top = (blobRect.bottom + 8) + 'px';
+                picker.style.zIndex = '10000';
+                picker.classList.add('active');
               }
             });
             
@@ -2447,6 +2509,8 @@
         const hexInput = document.createElement('input');
         hexInput.type = 'text';
         hexInput.className = 'color-hex-input';
+        hexInput.id = `color-hex-input-${index}`;
+        hexInput.name = `color-hex-${index}`;
         hexInput.value = color.hex.substring(1).toUpperCase();
         hexInput.maxLength = 6;
         hexInput.placeholder = 'HEX';
@@ -2479,7 +2543,15 @@
         pickerMain.appendChild(pickerSquare);
         pickerMain.appendChild(pickerHue);
         customPicker.appendChild(pickerMain);
-        customPicker.appendChild(colorResult.cloneNode(true));
+        
+        // Create a separate colorResult for the picker (clone but with unique id)
+        const pickerColorResult = colorResult.cloneNode(true);
+        const clonedHexInput = pickerColorResult.querySelector('.color-hex-input');
+        if (clonedHexInput) {
+          clonedHexInput.id = `color-hex-input-picker-${index}`;
+          clonedHexInput.name = `color-hex-picker-${index}`;
+        }
+        customPicker.appendChild(pickerColorResult);
 
         colorPickerWrapper.appendChild(colorResult);
         colorPickerWrapper.appendChild(customPicker);
@@ -2539,12 +2611,17 @@
         }
 
         let isDraggingSquare = false;
+        let squareRectCache = null; // Cache rect to avoid expensive getBoundingClientRect calls
+        let squareRafId = null; // RAF ID for throttling expensive updates
+        let squareDomCache = null; // Cache DOM elements to avoid queries during drag
         
         const handleSquareMove = (e) => {
-          const rect = pickerSquare.getBoundingClientRect();
+          // Use cached rect if available (set at drag start)
+          const rect = squareRectCache || pickerSquare.getBoundingClientRect();
           squareX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
           squareY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
           
+          // Update handle position immediately for visual feedback
           pickerHandle.style.left = (squareX * 100) + '%';
           pickerHandle.style.top = (squareY * 100) + '%';
           
@@ -2564,133 +2641,238 @@
           currentSaturation = hsl.s / 100;
           currentLightness = hsl.l / 100;
           
-          // Update display
+          // Update display immediately for responsive feedback (use cached DOM elements)
           colorSwatch.style.background = color.hex;
           hexInput.value = color.hex.substring(1).toUpperCase();
           
-          // Update picker's result display
-          const pickerResult = customPicker.querySelector('.color-picker-result');
-          if (pickerResult) {
-            const pickerSwatch = pickerResult.querySelector('.color-swatch');
-            const pickerHex = pickerResult.querySelector('.color-hex-input');
-            if (pickerSwatch) pickerSwatch.style.background = color.hex;
-            if (pickerHex) pickerHex.value = color.hex.substring(1).toUpperCase();
+          // Update picker's result display using cached elements
+          if (squareDomCache) {
+            if (squareDomCache.pickerSwatch) squareDomCache.pickerSwatch.style.background = color.hex;
+            if (squareDomCache.pickerHex) squareDomCache.pickerHex.value = color.hex.substring(1).toUpperCase();
           }
           
           // Update hue handle position
           const huePercent = Math.max(0, Math.min(100, (currentHue / 360) * 100));
           hueHandle.style.top = huePercent + '%';
           
-          updateOutput();
-          saveState(); // Save state when color changes
+          // Throttle expensive updates using requestAnimationFrame
+          if (!squareRafId) {
+            squareRafId = requestAnimationFrame(() => {
+              updateOutput();
+              saveState(); // Save state when color changes
+              squareRafId = null;
+            });
+          }
         };
 
         pickerSquare.addEventListener('mousedown', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          isDraggingSquare = true;
+          e.stopImmediatePropagation();
+          
           isDraggingInPicker = true;
+          preventClickClose = true;
+          lastMouseDownTime = Date.now();
+          lastMouseDownTarget = e.target;
+          customPicker.dataset.interacting = 'true';
+          
+          // Cache rect at drag start
+          squareRectCache = pickerSquare.getBoundingClientRect();
+          const pickerResult = customPicker.querySelector('.color-picker-result');
+          squareDomCache = {
+            pickerSwatch: pickerResult ? pickerResult.querySelector('.color-swatch') : null,
+            pickerHex: pickerResult ? pickerResult.querySelector('.color-hex-input') : null
+          };
+          isDraggingSquare = true;
+          draggingPickerIndex = index;
           handleSquareMove(e);
         });
 
         const handleSquareMouseMove = (e) => {
           if (isDraggingSquare) {
             e.preventDefault();
+            e.stopPropagation(); // Also stop propagation to prevent scroll
             handleSquareMove(e);
           }
         };
 
-        const handleSquareMouseUp = () => {
-          if (isDraggingSquare) isDraggingSquare = false;
+        const handleSquareMouseUp = (e) => {
+          if (isDraggingSquare) {
+            isDraggingSquare = false;
+            draggingPickerIndex = null;
+            squareRectCache = null;
+            squareDomCache = null;
+            if (squareRafId) {
+              cancelAnimationFrame(squareRafId);
+              squareRafId = null;
+            }
+            requestAnimationFrame(() => {
+              updateOutput();
+              saveState();
+            });
+            preventClickClose = true;
+            setTimeout(() => {
+              isDraggingInPicker = false;
+              preventClickClose = false;
+              if (customPicker.dataset) {
+                customPicker.dataset.interacting = 'false';
+              }
+            }, 300);
+          }
         };
 
         // Check if this picker is currently active (might be moved to body)
-        const existingPicker = document.querySelector(`.custom-color-picker[data-color-index="${index}"]`);
-        const pickerIsActive = existingPicker && existingPicker.classList.contains('active');
+        // Check body first (where active pickers are moved), then container
+        const activePickerInBody = document.body.querySelector(`.custom-color-picker[data-color-index="${index}"].active`);
+        const pickerIsActive = activePickerInBody !== null;
         
-        // Remove old listeners for this index if they exist (when re-rendering)
-        // BUT: Don't remove if this picker is currently active and being dragged
-        if (colorPickerListeners.has(index) && !pickerIsActive && !isDraggingInPicker) {
+        // Remove old listeners first, but NOT if this specific picker is currently being dragged
+        if (colorPickerListeners.has(index) && draggingPickerIndex !== index) {
           const oldListeners = colorPickerListeners.get(index);
           if (oldListeners.squareMove) {
+            logListenerAction('REMOVING', 'squareMove', index);
             document.removeEventListener('mousemove', oldListeners.squareMove);
           }
           if (oldListeners.squareUp) {
+            logListenerAction('REMOVING', 'squareUp', index);
             document.removeEventListener('mouseup', oldListeners.squareUp);
           }
+        } else if (draggingPickerIndex === index) {
+          logListenerAction('SKIPPING REMOVAL (dragging)', 'square', index);
         }
         
-        // Store new listeners (or keep old ones if picker is active)
-        if (!colorPickerListeners.has(index) || (!pickerIsActive && !isDraggingInPicker)) {
-          if (!colorPickerListeners.has(index)) {
-            colorPickerListeners.set(index, {});
-          }
-          colorPickerListeners.get(index).squareMove = handleSquareMouseMove;
-          colorPickerListeners.get(index).squareUp = handleSquareMouseUp;
-          
-          document.addEventListener('mousemove', handleSquareMouseMove);
-          document.addEventListener('mouseup', handleSquareMouseUp);
+        // Store and attach new listeners
+        if (!colorPickerListeners.has(index)) {
+          colorPickerListeners.set(index, {});
         }
+        colorPickerListeners.get(index).squareMove = handleSquareMouseMove;
+        colorPickerListeners.get(index).squareUp = handleSquareMouseUp;
+        
+        logListenerAction('ADDING', 'square', index);
+        document.addEventListener('mousemove', handleSquareMouseMove);
+        document.addEventListener('mouseup', handleSquareMouseUp);
+        
 
         let isDraggingHue = false;
+        let hueRectCache = null; // Cache rect to avoid expensive getBoundingClientRect calls
+        let hueRafId = null; // RAF ID for throttling updates
+        let hueDomCache = null; // Cache DOM elements to avoid queries during drag
+        
         const handleHueMove = (e) => {
-          const rect = pickerHue.getBoundingClientRect();
+          // Use cached rect if available (set at drag start)
+          const rect = hueRectCache || pickerHue.getBoundingClientRect();
           const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
           currentHue = Math.max(0, Math.min(360, y * 360));
-          updatePickerUI();
-          updateColorFromHSL();
+          
+          // Update handle position immediately for visual feedback
+          const huePercent = Math.max(0, Math.min(100, (currentHue / 360) * 100));
+          hueHandle.style.top = huePercent + '%';
+          
+          // Throttle expensive updates using requestAnimationFrame
+          if (!hueRafId) {
+            hueRafId = requestAnimationFrame(() => {
+              updatePickerUI();
+              updateColorFromHSL();
+              hueRafId = null;
+            });
+          }
         };
 
         pickerHue.addEventListener('mousedown', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          isDraggingHue = true;
+          e.stopImmediatePropagation();
+          
           isDraggingInPicker = true;
+          preventClickClose = true;
+          lastMouseDownTime = Date.now();
+          lastMouseDownTarget = e.target;
+          customPicker.dataset.interacting = 'true';
+          
+          // Cache rect at drag start
+          hueRectCache = pickerHue.getBoundingClientRect();
+          const pickerResult = customPicker.querySelector('.color-picker-result');
+          hueDomCache = {
+            pickerSwatch: pickerResult ? pickerResult.querySelector('.color-swatch') : null,
+            pickerHex: pickerResult ? pickerResult.querySelector('.color-hex-input') : null
+          };
+          isDraggingHue = true;
+          draggingPickerIndex = index;
           handleHueMove(e);
         });
 
         const handleHueMouseMove = (e) => {
           if (isDraggingHue) {
             e.preventDefault();
+            e.stopPropagation(); // Also stop propagation to prevent scroll
             handleHueMove(e);
           }
         };
 
-        const handleHueMouseUp = () => {
-          if (isDraggingHue) isDraggingHue = false;
+        const handleHueMouseUp = (e) => {
+          if (isDraggingHue) {
+            isDraggingHue = false;
+            draggingPickerIndex = null;
+            hueRectCache = null;
+            hueDomCache = null;
+            if (hueRafId) {
+              cancelAnimationFrame(hueRafId);
+              hueRafId = null;
+            }
+            requestAnimationFrame(() => {
+              updatePickerUI();
+              updateColorFromHSL();
+            });
+            preventClickClose = true;
+            setTimeout(() => {
+              isDraggingInPicker = false;
+              preventClickClose = false;
+              if (customPicker.dataset) {
+                customPicker.dataset.interacting = 'false';
+              }
+            }, 300);
+          }
         };
 
         // Check if this picker is currently active (might be moved to body)
-        const existingPickerHue = document.querySelector(`.custom-color-picker[data-color-index="${index}"]`);
-        const pickerIsActiveHue = existingPickerHue && existingPickerHue.classList.contains('active');
+        // Check body first (where active pickers are moved), then container
+        const activePickerInBodyHue = document.body.querySelector(`.custom-color-picker[data-color-index="${index}"].active`);
+        const pickerIsActiveHue = activePickerInBodyHue !== null;
         
-        // Remove old listeners for this index if they exist (when re-rendering)
-        // BUT: Don't remove if this picker is currently active and being dragged
-        if (colorPickerListeners.has(index) && !pickerIsActiveHue && !isDraggingInPicker) {
+        // Remove old listeners first, but NOT if this specific picker is currently being dragged
+        if (colorPickerListeners.has(index) && draggingPickerIndex !== index) {
           const oldListeners = colorPickerListeners.get(index);
           if (oldListeners.hueMove) {
+            logListenerAction('REMOVING', 'hueMove', index);
             document.removeEventListener('mousemove', oldListeners.hueMove);
           }
           if (oldListeners.hueUp) {
+            logListenerAction('REMOVING', 'hueUp', index);
             document.removeEventListener('mouseup', oldListeners.hueUp);
           }
+        } else if (draggingPickerIndex === index) {
+          logListenerAction('SKIPPING REMOVAL (dragging)', 'hue', index);
         }
         
-        // Store new listeners (or keep old ones if picker is active)
-        if (!colorPickerListeners.has(index) || (!pickerIsActiveHue && !isDraggingInPicker)) {
-          if (!colorPickerListeners.has(index)) {
-            colorPickerListeners.set(index, {});
-          }
-          colorPickerListeners.get(index).hueMove = handleHueMouseMove;
-          colorPickerListeners.get(index).hueUp = handleHueMouseUp;
-          
-          document.addEventListener('mousemove', handleHueMouseMove);
-          document.addEventListener('mouseup', handleHueMouseUp);
+        // Store and attach new listeners
+        if (!colorPickerListeners.has(index)) {
+          colorPickerListeners.set(index, {});
         }
+        colorPickerListeners.get(index).hueMove = handleHueMouseMove;
+        colorPickerListeners.get(index).hueUp = handleHueMouseUp;
+        
+        logListenerAction('ADDING', 'hue', index);
+        document.addEventListener('mousemove', handleHueMouseMove);
+        document.addEventListener('mouseup', handleHueMouseUp);
+        
 
+        // REMOVED: Don't prevent click propagation - let the global handler check if click is inside picker
+        // The global handler will check the event path and prevent closing if inside picker
+        
         colorSwatch.addEventListener('click', (e) => {
           e.stopPropagation();
           e.preventDefault();
+          e.stopImmediatePropagation();
           const isCurrentlyActive = customPicker.classList.contains('active');
           
           // Close all pickers first
@@ -2805,23 +2987,46 @@
       // Track color picker document listeners to prevent leaks
       const colorPickerListeners = new Map(); // Map<index, { squareMove, squareUp, hueMove, hueUp }>
       
+      // Debug: Track all document-level listeners
+      let listenerDebugCount = 0;
+      function logListenerAction(action, type, index) {
+        listenerDebugCount++;
+        const totalListeners = colorPickerListeners.size;
+        const allListeners = Array.from(colorPickerListeners.entries()).map(([idx, listeners]) => {
+          const count = Object.values(listeners).filter(l => l).length;
+          return `index${idx}:${count}`;
+        }).join(', ');
+      }
+      
+      function countAllDocumentListeners() {
+        // This is approximate - we can't directly count event listeners
+        // But we can count what we've stored
+        let total = 0;
+        colorPickerListeners.forEach((listeners) => {
+          if (listeners.squareMove) total++;
+          if (listeners.squareUp) total++;
+          if (listeners.hueMove) total++;
+          if (listeners.hueUp) total++;
+        });
+        return total;
+      }
+      
       function renderColorStops() {
         const container = document.getElementById('color-stops');
         if (!container) return;
         
-        // Check if any picker is currently active (open and possibly being dragged)
         const hasActivePicker = document.querySelector('.custom-color-picker.active') !== null;
         const isDragging = isDraggingInPicker;
         
-        // Get current color stop indices before clearing
+        if (hasActivePicker || isDragging || preventClickClose) {
+          return;
+        }
+        
         const currentIndices = new Set(colorStops.map((_, idx) => idx));
         
-        // Only remove listeners for color stops that no longer exist
-        // BUT: Don't remove listeners if a picker is active and being dragged
         if (!isDragging) {
           colorPickerListeners.forEach((listeners, index) => {
             if (!currentIndices.has(index)) {
-              // This color stop was removed, clean up its listeners
               if (listeners.squareMove) {
                 document.removeEventListener('mousemove', listeners.squareMove);
               }
@@ -2838,6 +3043,15 @@
             }
           });
         }
+        
+        const bodyPickers = document.body.querySelectorAll('.custom-color-picker');
+        bodyPickers.forEach(picker => {
+          const isActive = picker.classList.contains('active');
+          const isInteracting = picker.dataset.interacting === 'true';
+          if (!isActive && !isInteracting) {
+            picker.remove();
+          }
+        });
         
         container.innerHTML = '';
         
@@ -3009,6 +3223,7 @@
             // Track the index of the most recently added color (push to stack)
             addedColorIndices.push(originalIndex);
           }
+          closeAllPickers(); // Close any open pickers before rendering
           renderColorStops();
           updatePreview();
           updateOutput();
