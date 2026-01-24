@@ -1490,6 +1490,14 @@
       // Cache key for localStorage
       const CACHE_KEY = 'rgb_tool_state_v1';
       
+      // Cache frequently accessed DOM elements
+      const gradientPreviewEl = document.getElementById('gradient-preview');
+      const inputTextEl = document.getElementById('input-text');
+      const textPreviewEl = document.getElementById('text-preview');
+      const outputCodeEl = document.getElementById('output-code');
+      const charCounterEl = document.getElementById('char-counter');
+      const colorStopsContainer = document.getElementById('color-stops');
+      
       // Validation functions
       function isValidText(text) {
         return typeof text === 'string' && text.length <= 24;
@@ -1541,7 +1549,8 @@
       // Save state to localStorage
       function saveState() {
         try {
-          const input = document.getElementById('input-text');
+          if (!inputTextEl) return;
+          const input = inputTextEl;
           const formatBold = document.getElementById('format-bold');
           const formatItalic = document.getElementById('format-italic');
           const formatUnderline = document.getElementById('format-underline');
@@ -1736,7 +1745,6 @@
       let preventClickClose = false;
       let draggingPickerIndex = null;
       let lastMouseDownTime = 0;
-      let lastMouseDownTarget = null;
 
       // SINGLE mouseup handler
       document.addEventListener('mouseup', (e) => {
@@ -1835,30 +1843,23 @@
       // Lightweight preview update (only gradient background, no DOM manipulation)
       let gradientUpdateCount = 0;
       function updatePreviewGradient() {
-        // Update gradient background
-        
-        const preview = document.getElementById('gradient-preview');
-        if (!preview) return;
-        
-        // Sort color stops by position (cache this if possible)
+        if (!gradientPreviewEl) return;
         const sortedStops = [...colorStops].sort((a, b) => a.position - b.position);
-        
-        // Build gradient with positions
         const gradientStops = sortedStops.map(stop => `${stop.hex} ${stop.position}%`).join(', ');
-        preview.style.background = `linear-gradient(90deg, ${gradientStops})`;
+        gradientPreviewEl.style.background = `linear-gradient(90deg, ${gradientStops})`;
       }
 
       function updatePreview() {
-        const preview = document.getElementById('gradient-preview');
-        if (!preview) return;
+        if (!gradientPreviewEl) return;
+        const preview = gradientPreviewEl;
         
         // Don't recreate indicators if dragging - just update positions
         if (isDraggingAny) {
           updatePreviewGradient();
           // Update existing indicator positions without recreating them
           colorStops.forEach((stop, index) => {
-            const existingIndicator = preview.querySelector(`.gradient-indicator[data-index="${index}"]`);
-            const existingBlob = preview.querySelector(`.gradient-color-blob[data-index="${index}"]`);
+            const existingIndicator = gradientPreviewEl.querySelector(`.gradient-indicator[data-index="${index}"]`);
+            const existingBlob = gradientPreviewEl.querySelector(`.gradient-color-blob[data-index="${index}"]`);
             if (existingIndicator) {
               existingIndicator.style.left = stop.position + '%';
             }
@@ -1876,9 +1877,9 @@
         updatePreviewGradient();
         
         // Remove existing indicators and blobs
-        const existingIndicators = preview.querySelectorAll('.gradient-indicator');
+        const existingIndicators = gradientPreviewEl.querySelectorAll('.gradient-indicator');
         existingIndicators.forEach(ind => ind.remove());
-        const existingBlobs = preview.querySelectorAll('.gradient-color-blob');
+        const existingBlobs = gradientPreviewEl.querySelectorAll('.gradient-color-blob');
         existingBlobs.forEach(blob => blob.remove());
         
         // Add indicators and color blobs for each color stop
@@ -1936,28 +1937,25 @@
                 
                 if (existingPicker) {
                   requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                      const blobRect = colorBlob.getBoundingClientRect();
-                      
-                      if (blobRect.width === 0 && blobRect.height === 0) {
-                        setTimeout(() => {
-                          const retryRect = colorBlob.getBoundingClientRect();
-                          if (retryRect.width > 0 || retryRect.height > 0) {
-                            positionPicker(existingPicker, colorBlob, retryRect);
-                          }
-                        }, 50);
-                        return;
-                      }
-                      
-                      positionPicker(existingPicker, colorBlob, blobRect);
-                    });
+                    const blobRect = colorBlob.getBoundingClientRect();
+                    
+                    if (blobRect.width === 0 && blobRect.height === 0) {
+                      setTimeout(() => {
+                        const retryRect = colorBlob.getBoundingClientRect();
+                        if (retryRect.width > 0 || retryRect.height > 0) {
+                          positionPicker(existingPicker, colorBlob, retryRect);
+                        }
+                      }, 50);
+                      return;
+                    }
+                    
+                    positionPicker(existingPicker, colorBlob, blobRect);
                   });
                 }
               }, 50);
               
               function positionPicker(picker, blob, blobRect) {
                 if (!picker.dataset.originalParent) {
-                  const colorStopsContainer = document.getElementById('color-stops');
                   if (colorStopsContainer?.contains(picker)) {
                     picker.dataset.originalParent = 'color-stops';
                   }
@@ -1977,7 +1975,7 @@
               }
             });
             
-            preview.appendChild(colorBlob);
+            gradientPreviewEl.appendChild(colorBlob);
             
             // Make draggable
             let isDragging = false;
@@ -2012,9 +2010,9 @@
               sortedStopsCache = [...colorStops].sort((a, b) => a.position - b.position);
               
               // Cache preview width and color blob at drag start (no queries during drag)
-              const previewRect = preview.getBoundingClientRect();
+              const previewRect = gradientPreviewEl.getBoundingClientRect();
               previewWidth = previewRect.width;
-              cachedColorBlob = preview.querySelector(`.gradient-color-blob[data-index="${index}"]`);
+              cachedColorBlob = gradientPreviewEl.querySelector(`.gradient-color-blob[data-index="${index}"]`);
               
               // Add event listeners only when dragging starts (prevents accumulation)
               document.addEventListener('mousemove', handleMouseMove);
@@ -2138,7 +2136,7 @@
             // Add event listeners only when dragging starts
             // Note: The actual mousedown handler is added above (line 1794)
             // This duplicate listener was removed to prevent leaks
-            preview.appendChild(indicator);
+            gradientPreviewEl.appendChild(indicator);
           });
         }
       }
@@ -2178,7 +2176,8 @@
           return 'Add at least 2 colors to generate gradient code';
         }
 
-        let inputText = document.getElementById('input-text').value.trim();
+        if (!inputTextEl) return '';
+        let inputText = inputTextEl.value.trim();
         if (!inputText) {
           return 'Enter text to generate gradient code';
         }
@@ -2186,11 +2185,11 @@
         const sortedStops = [...colorStops].sort((a, b) => a.position - b.position);
         const activeCommand = document.querySelector('.command-switcher button.active');
         const command = activeCommand ? activeCommand.dataset.command : 'none';
-        const formatBold = document.getElementById('format-bold').checked;
-        const formatItalic = document.getElementById('format-italic').checked;
-        const formatUnderline = document.getElementById('format-underline').checked;
-        const formatStrikethrough = document.getElementById('format-strikethrough').checked;
-        const formatSmall = document.getElementById('format-small').checked;
+        const formatBold = document.getElementById('format-bold')?.checked || false;
+        const formatItalic = document.getElementById('format-italic')?.checked || false;
+        const formatUnderline = document.getElementById('format-underline')?.checked || false;
+        const formatStrikethrough = document.getElementById('format-strikethrough')?.checked || false;
+        const formatSmall = document.getElementById('format-small')?.checked || false;
         
         if (formatSmall) {
           inputText = toSmallCaps(inputText);
@@ -2340,11 +2339,10 @@
 
 
       function updateTextPreview() {
-        const preview = document.getElementById('text-preview');
-        if (!preview) return;
-        
-        const input = document.getElementById('input-text');
-        let inputText = input ? input.value : '';
+        if (!textPreviewEl || !inputTextEl) return;
+        const preview = textPreviewEl;
+        const input = inputTextEl;
+        let inputText = input.value;
         
         preview.innerHTML = '';
         
@@ -2361,11 +2359,11 @@
         }
 
         // Get formatting options
-        const formatBold = document.getElementById('format-bold').checked;
-        const formatItalic = document.getElementById('format-italic').checked;
-        const formatUnderline = document.getElementById('format-underline').checked;
-        const formatStrikethrough = document.getElementById('format-strikethrough').checked;
-        const formatSmall = document.getElementById('format-small').checked;
+        const formatBold = document.getElementById('format-bold')?.checked || false;
+        const formatItalic = document.getElementById('format-italic')?.checked || false;
+        const formatUnderline = document.getElementById('format-underline')?.checked || false;
+        const formatStrikethrough = document.getElementById('format-strikethrough')?.checked || false;
+        const formatSmall = document.getElementById('format-small')?.checked || false;
         
         if (formatSmall) {
           inputText = toSmallCaps(inputText);
@@ -2470,16 +2468,14 @@
           } else if (formatStrikethrough) {
             charSpan.style.textDecoration = 'line-through';
           }
-          preview.appendChild(charSpan);
+          textPreviewEl.appendChild(charSpan);
         }
       }
 
       let outputUpdateCount = 0;
       function updateOutput() {
-        // Generate and update output
-        
-        const output = document.getElementById('output-code');
-        output.textContent = generateCode();
+        if (!outputCodeEl) return;
+        outputCodeEl.textContent = generateCode();
         
         // Only update full preview if not dragging (prevents indicator recreation)
         if (!isDraggingAny) {
@@ -2673,7 +2669,6 @@
           isDraggingInPicker = true;
           preventClickClose = true;
           lastMouseDownTime = Date.now();
-          lastMouseDownTarget = e.target;
           customPicker.dataset.interacting = 'true';
           
           // Cache rect at drag start
@@ -2730,15 +2725,12 @@
         if (colorPickerListeners.has(index) && draggingPickerIndex !== index) {
           const oldListeners = colorPickerListeners.get(index);
           if (oldListeners.squareMove) {
-            logListenerAction('REMOVING', 'squareMove', index);
             document.removeEventListener('mousemove', oldListeners.squareMove);
           }
           if (oldListeners.squareUp) {
-            logListenerAction('REMOVING', 'squareUp', index);
             document.removeEventListener('mouseup', oldListeners.squareUp);
           }
         } else if (draggingPickerIndex === index) {
-          logListenerAction('SKIPPING REMOVAL (dragging)', 'square', index);
         }
         
         // Store and attach new listeners
@@ -2748,7 +2740,6 @@
         colorPickerListeners.get(index).squareMove = handleSquareMouseMove;
         colorPickerListeners.get(index).squareUp = handleSquareMouseUp;
         
-        logListenerAction('ADDING', 'square', index);
         document.addEventListener('mousemove', handleSquareMouseMove);
         document.addEventListener('mouseup', handleSquareMouseUp);
         
@@ -2786,7 +2777,6 @@
           isDraggingInPicker = true;
           preventClickClose = true;
           lastMouseDownTime = Date.now();
-          lastMouseDownTarget = e.target;
           customPicker.dataset.interacting = 'true';
           
           // Cache rect at drag start
@@ -2843,15 +2833,12 @@
         if (colorPickerListeners.has(index) && draggingPickerIndex !== index) {
           const oldListeners = colorPickerListeners.get(index);
           if (oldListeners.hueMove) {
-            logListenerAction('REMOVING', 'hueMove', index);
             document.removeEventListener('mousemove', oldListeners.hueMove);
           }
           if (oldListeners.hueUp) {
-            logListenerAction('REMOVING', 'hueUp', index);
             document.removeEventListener('mouseup', oldListeners.hueUp);
           }
         } else if (draggingPickerIndex === index) {
-          logListenerAction('SKIPPING REMOVAL (dragging)', 'hue', index);
         }
         
         // Store and attach new listeners
@@ -2861,7 +2848,6 @@
         colorPickerListeners.get(index).hueMove = handleHueMouseMove;
         colorPickerListeners.get(index).hueUp = handleHueMouseUp;
         
-        logListenerAction('ADDING', 'hue', index);
         document.addEventListener('mousemove', handleHueMouseMove);
         document.addEventListener('mouseup', handleHueMouseUp);
         
@@ -2975,9 +2961,8 @@
         
         // Update gradient color blob
         const stopIndex = stop.dataset.index;
-        const preview = document.getElementById('gradient-preview');
-        if (preview) {
-          const colorBlob = preview.querySelector(`.gradient-color-blob[data-index="${stopIndex}"]`);
+        if (gradientPreviewEl) {
+          const colorBlob = gradientPreviewEl.querySelector(`.gradient-color-blob[data-index="${stopIndex}"]`);
           if (colorBlob) {
             colorBlob.style.background = color.hex;
           }
@@ -2987,33 +2972,10 @@
       // Track color picker document listeners to prevent leaks
       const colorPickerListeners = new Map(); // Map<index, { squareMove, squareUp, hueMove, hueUp }>
       
-      // Debug: Track all document-level listeners
-      let listenerDebugCount = 0;
-      function logListenerAction(action, type, index) {
-        listenerDebugCount++;
-        const totalListeners = colorPickerListeners.size;
-        const allListeners = Array.from(colorPickerListeners.entries()).map(([idx, listeners]) => {
-          const count = Object.values(listeners).filter(l => l).length;
-          return `index${idx}:${count}`;
-        }).join(', ');
-      }
-      
-      function countAllDocumentListeners() {
-        // This is approximate - we can't directly count event listeners
-        // But we can count what we've stored
-        let total = 0;
-        colorPickerListeners.forEach((listeners) => {
-          if (listeners.squareMove) total++;
-          if (listeners.squareUp) total++;
-          if (listeners.hueMove) total++;
-          if (listeners.hueUp) total++;
-        });
-        return total;
-      }
       
       function renderColorStops() {
-        const container = document.getElementById('color-stops');
-        if (!container) return;
+        if (!colorStopsContainer) return;
+        const container = colorStopsContainer;
         
         const hasActivePicker = document.querySelector('.custom-color-picker.active') !== null;
         const isDragging = isDraggingInPicker;
@@ -3289,8 +3251,9 @@
 
       // Update character counter
       function updateCharCounter() {
-        const input = document.getElementById('input-text');
-        const counter = document.getElementById('char-counter');
+        if (!inputTextEl || !charCounterEl) return;
+        const input = inputTextEl;
+        const counter = charCounterEl;
         const length = input.value.length;
         counter.textContent = `${length}/24`;
         if (length >= 24) {
@@ -3306,8 +3269,9 @@
 
       // Text input and formatting options
       // Use beforeinput to capture the character/data before it's converted
-      document.getElementById('input-text').addEventListener('beforeinput', (e) => {
-        const formatSmall = document.getElementById('format-small').checked;
+      if (inputTextEl) {
+        inputTextEl.addEventListener('beforeinput', (e) => {
+          const formatSmall = document.getElementById('format-small').checked;
         const input = e.target;
         
         // Store the old value BEFORE the browser modifies it
@@ -3328,7 +3292,7 @@
         }
       });
 
-      document.getElementById('input-text').addEventListener('input', (e) => {
+      inputTextEl.addEventListener('input', (e) => {
         const formatSmall = document.getElementById('format-small').checked;
         const input = e.target;
         const cursorPos = input.selectionStart;
@@ -3534,41 +3498,40 @@
         // Skip processing during initialization to avoid overwriting originalText
         if (isInitializing) return;
         
-        const input = document.getElementById('input-text');
-        if (input) {
-          const formatSmall = document.getElementById('format-small').checked;
-          if (formatSmall) {
-            // When enabling small font: save current text as original, then convert
-            // Check if input.value is already in small caps - if so, convert it back first
+        if (!inputTextEl) return;
+        const input = inputTextEl;
+        const formatSmall = document.getElementById('format-small').checked;
+        if (formatSmall) {
+          // When enabling small font: save current text as original, then convert
+          // Check if input.value is already in small caps - if so, convert it back first
+          const convertedBack = fromSmallCaps(input.value);
+          if (convertedBack !== input.value && convertedBack.length === input.value.length) {
+            // input.value is in small caps, use the converted version as originalText
+            originalText = convertedBack;
+          } else {
+            // input.value is not in small caps, use it directly as originalText
+            originalText = input.value;
+          }
+          input.value = toSmallCaps(originalText);
+        } else {
+          // When disabling small font: restore from originalText
+          // Ensure originalText is not in small caps format - convert back if needed
+          if (originalText) {
+            const convertedBack = fromSmallCaps(originalText);
+            // If conversion changed the text, originalText was in small caps, use converted version
+            if (convertedBack !== originalText && convertedBack.length === originalText.length) {
+              originalText = convertedBack;
+              input.value = originalText;
+            } else {
+              // originalText is already in original format, use it directly
+              input.value = originalText;
+            }
+          } else {
+            // Fallback: try to convert input.value back from small caps
             const convertedBack = fromSmallCaps(input.value);
             if (convertedBack !== input.value && convertedBack.length === input.value.length) {
-              // input.value is in small caps, use the converted version as originalText
               originalText = convertedBack;
-            } else {
-              // input.value is not in small caps, use it directly as originalText
-              originalText = input.value;
-            }
-            input.value = toSmallCaps(originalText);
-          } else {
-            // When disabling small font: restore from originalText
-            // Ensure originalText is not in small caps format - convert back if needed
-            if (originalText) {
-              const convertedBack = fromSmallCaps(originalText);
-              // If conversion changed the text, originalText was in small caps, use converted version
-              if (convertedBack !== originalText && convertedBack.length === originalText.length) {
-                originalText = convertedBack;
-                input.value = originalText;
-              } else {
-                // originalText is already in original format, use it directly
-                input.value = originalText;
-              }
-            } else {
-              // Fallback: try to convert input.value back from small caps
-              const convertedBack = fromSmallCaps(input.value);
-              if (convertedBack !== input.value && convertedBack.length === input.value.length) {
-                originalText = convertedBack;
-                input.value = originalText;
-              }
+              input.value = originalText;
             }
           }
         }
@@ -3576,18 +3539,19 @@
         updateTextPreview();
         saveState(); // Save state when small font changes
       });
-
+      }
 
       // Initialize - wait for DOM to be ready
       // Gradient preview click handler
       function initGradientPreviewClick() {
-        const preview = document.getElementById('gradient-preview');
-        if (!preview) return;
+        if (!gradientPreviewEl) return;
+        const preview = gradientPreviewEl;
         
         preview.addEventListener('click', (e) => {
           if (colorStops.length === 0) return;
           
-          const rect = preview.getBoundingClientRect();
+          if (!gradientPreviewEl) return;
+          const rect = gradientPreviewEl.getBoundingClientRect();
           const clickX = e.clientX - rect.left;
           const clickPercent = (clickX / rect.width) * 100;
           
@@ -3621,8 +3585,8 @@
                   }
                   document.body.appendChild(customPicker);
                 }
-                const preview = document.getElementById('gradient-preview');
-                const previewRect = preview.getBoundingClientRect();
+                if (!gradientPreviewEl) return;
+                const previewRect = gradientPreviewEl.getBoundingClientRect();
                 customPicker.style.position = 'fixed';
                 customPicker.style.display = 'block';
                 customPicker.style.visibility = 'visible';
@@ -3660,8 +3624,8 @@
         updateCharCounter();
         
         // Set text from URL parameter (takes precedence) or cache
-        const input = document.getElementById('input-text');
-        if (input) {
+        if (inputTextEl) {
+          const input = inputTextEl;
           if (textParam) {
             const decodedText = decodeURIComponent(textParam);
             const truncatedText = decodedText.substring(0, 24);
