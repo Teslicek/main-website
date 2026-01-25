@@ -37,6 +37,9 @@ body {
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  /* Remove blue tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
 }
 
 /* Background Gradient Overlay */
@@ -531,7 +534,7 @@ footer {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 16px; /* Desktop padding */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -543,7 +546,7 @@ footer {
 /* Mobile: Add more side spacing to footer */
 @media (max-width: 820px) {
   .footer-content {
-    padding: 0 20px; /* Increase horizontal padding on mobile */
+    padding: 0 20px; /* Increase horizontal padding on mobile only */
   }
 }
 
@@ -565,15 +568,9 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  align-items: center;
+  align-items: flex-start; /* Always left-aligned */
   min-width: 0; /* Allow text to shrink if needed */
-}
-
-@media (min-width: 640px) {
-  .footer-copyright {
-    align-items: flex-start;
-    text-align: left;
-  }
+  text-align: left; /* Always left-aligned */
 }
 
 .footer-copyright-text {
