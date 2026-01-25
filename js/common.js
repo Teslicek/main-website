@@ -615,9 +615,9 @@ function renderSkipLink() {
 
 // Auto-initialize navbar, footer, skip link, copy buttons, and API calls when DOM is ready
 function initSharedComponents() {
-  renderSkipLink();
   renderNavbar();
   renderFooter();
+  renderSkipLink(); // After navbar so skip link is first in DOM (a11y)
   initCopyButtons();
   initAPICalls();
 }

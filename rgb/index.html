@@ -3,13 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>RGB Gradient Generator | LifeSteal SMP</title>
 
     <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#0c0c0c" />
+    <meta name="color-scheme" content="dark" />
     <meta name="description" content="Generate RGB gradients for Minecraft. Create beautiful color transitions for text, signs, and more." />
     <link rel="canonical" href="https://www.lifestealsmp.com/rgb/" />
     <link rel="icon" href="../favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../logo.png" />
     <link rel="stylesheet" href="../css/common.css" />
+    <link rel="dns-prefetch" href="https://api.mcsrvstat.us" />
+    <link rel="dns-prefetch" href="https://discord.com" />
+    <link rel="dns-prefetch" href="https://store.lifestealsmp.com" />
 
     <style>
       /* Minecraft fonts from Birdflop */
@@ -45,269 +52,7 @@
         font-display: swap;
       }
       
-      :root {
-        --bg: #0c0c0c;
-        --surface: #151515;
-        --surface-light: #1c1c1c;
-        --text: #ffffff;
-        --muted: #b3b3b3;
-        --accent: #ff2e2e;
-        --accentHover: #ff4d4d;
-        --border: #242424;
-      }
-
-      * { box-sizing: border-box; }
-      html, body { height: 100%; }
-
-      html {
-        overflow: hidden;
-      }
-
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans,
-          "Apple Color Emoji", "Segoe UI Emoji";
-        position: relative;
-        overflow: hidden;
-      }
-
-      /* Main element styles are in css/common.css */
-
-      /* Container padding is in css/common.css */
-
-      main::-webkit-scrollbar {
-        width: 10px;
-      }
-
-      main::-webkit-scrollbar-track {
-        background: var(--bg);
-        border-left: 1px solid var(--border);
-      }
-
-      main::-webkit-scrollbar-thumb {
-        background: var(--surface-light);
-        border: 1px solid var(--border);
-        border-radius: 5px;
-      }
-
-      main::-webkit-scrollbar-thumb:hover {
-        background: var(--surface);
-      }
-
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: -2;
-        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.25) 100%);
-        opacity: 1;
-      }
-
-      a { color: inherit; text-decoration: none; }
-
-      .container {
-        width: 100%;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 12px 16px;
-      }
-
-      /* Header styles are in css/common.css */
-
-      .topbar {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        column-gap: 14px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-      }
-
-      /* Logo styles are in css/common.css */
-
-      /* Brand text styles are in css/common.css */
-
-      /* Navbar link styles are in css/common.css */
-
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        justify-content: flex-end;
-      }
-
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: var(--surface-light);
-        border: 1px solid var(--border);
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1;
-        white-space: nowrap;
-      }
-
-      #online-pill { gap: 6px; }
-
-      .pill-text {
-        display: grid;
-        grid-auto-rows: min-content;
-        justify-items: center;
-        row-gap: 2px;
-        line-height: 1.05;
-      }
-
-      .pill-topline {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        justify-content: center;
-        min-width: 88px;
-      }
-
-      .pill-sub {
-        font-size: 11px;
-        font-weight: 400;
-        color: var(--text);
-        opacity: 0.92;
-      }
-
-      #online-pill .pill-sub, #discord-pill .pill-sub { font-weight: 700; }
-
-      .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: #6b6b6b;
-        flex: 0 0 auto;
-      }
-      #online-pill[data-state="online"] .status-dot { background: #22c55e; }
-      #online-pill[data-state="offline"] .status-dot { background: #ef4444; }
-      #online-pill[data-state="unknown"] .status-dot { background: #6b6b6b; }
-
-      #playercount {
-        display: inline-block;
-        text-align: left;
-      }
-
-      .pixel-icon {
-        width: 18px;
-        height: 18px;
-        display: block;
-        flex: 0 0 auto;
-        color: var(--muted);
-      }
-      .pill:hover .pixel-icon { color: var(--text); }
-
-      .discord-icon {
-        width: 18px;
-        height: 18px;
-        display: block;
-        flex: 0 0 auto;
-        color: var(--muted);
-      }
-      .pill:hover .discord-icon { color: var(--text); }
-
-      @media (max-width: 820px) {
-        .nav-links { display: none; }
-        .topbar { grid-template-columns: 1fr auto; }
-        .nav-right .pill { display: none; }
-        .nav-right .btn { display: inline-flex; }
-        .brandsub { display: none; }
-
-        #online-pill { display: inline-flex; padding: 6px 8px; gap: 8px; }
-        #online-pill .pill-sub { display: none; }
-        #playercount { min-width: 0; }
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        height: 40px;
-        padding: 0 14px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: var(--surface-light);
-        color: var(--text);
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background 120ms ease, transform 100ms ease;
-      }
-      .btn:hover { background: #222222; }
-
-      .btn-primary {
-        background: var(--accent);
-        color: #fff;
-        border: none;
-      }
-      .btn-primary:hover { background: var(--accentHover); }
-
-      .menu-toggle {
-        display: none;
-        background: transparent;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text);
-        cursor: pointer;
-        padding: 0;
-        width: 40px;
-        height: 40px;
-        align-items: center;
-        justify-content: center;
-      }
-      .menu-toggle:hover {
-        background: var(--surface-light);
-      }
-      .menu-toggle svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      @media (max-width: 640px) {
-        .menu-toggle {
-          display: flex;
-        }
-        .nav-links {
-          display: none;
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          background: var(--surface);
-          border-bottom: 1px solid var(--border);
-          flex-direction: column;
-          align-items: stretch;
-          padding: 12px 16px;
-          gap: 0;
-        }
-        .nav-links.open {
-          display: flex;
-        }
-        .nav-links a {
-          padding: 12px 0;
-          border-bottom: 1px solid var(--border);
-        }
-        .nav-links a:last-child {
-          border-bottom: none;
-        }
-        .nav-links a.active::after {
-          display: none;
-        }
-      }
+      /* :root, base, navbar, pill, btn, container, main scrollbar, mobile menu in css/common.css */
 
       /* RGB Tool Styles */
       .rgb-tool {
@@ -316,11 +61,9 @@
       }
 
       .card {
-        background: var(--surface);
-        border-radius: 14px;
         padding: 28px;
-        border: 1px solid var(--border);
         margin-bottom: 20px;
+        /* Base .card in css/common.css */
       }
 
       h1 {
@@ -329,6 +72,7 @@
         font-weight: 700;
         text-align: center;
       }
+      /* main h1 base in css/common.css */
 
       h2 {
         margin: 0 0 20px;
@@ -715,25 +459,12 @@
         top: 50%;
         right: 8px;
         transform: translateY(-50%);
-        height: 34px;
-        padding: 0 12px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: var(--surface);
-        color: var(--text);
-        font-weight: 600;
-        font-size: 12px;
-        cursor: pointer;
-        transition: background 120ms ease, transform 100ms ease;
         z-index: 1;
       }
-      
-      .copy:hover { background: #222222; }
-      .copy:active { transform: translateY(-50%) scale(0.98); }
-      .copy:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+      .copy:active {
+        transform: translateY(-50%) scale(0.98);
       }
+      /* .copy base in css/common.css */
 
       .input-preview-section {
         margin-bottom: 20px;

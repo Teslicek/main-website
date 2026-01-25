@@ -79,6 +79,38 @@ a {
   outline-offset: 2px;
   border-radius: 4px;
 }
+button:focus-visible,
+a:focus-visible {
+  outline-offset: 3px;
+}
+
+/* Content typography - shared by index, vote, etc. */
+main p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 16px;
+  max-width: 64ch;
+}
+main code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95em;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.note {
+  color: var(--muted);
+  line-height: 1.5;
+}
+main h1 {
+  margin: 0;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  font-weight: 750;
+}
 
 /* Header/Navbar Styles */
 header {
@@ -571,9 +603,44 @@ footer {
   transform: none;
 }
 
-/* Copy Button */
+.btn:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 820px) {
+  .btn, .copy {
+    min-height: 44px;
+  }
+}
+
+/* Card - base styles shared by vote, realm, rgb, index */
+.card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+/* Copy Button - shared base */
 .copy {
-  padding: 8px 16px;
-  font-size: 13px;
-  min-width: 80px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms ease, transform 100ms ease;
+}
+.copy:hover {
+  background: #222222;
+}
+.copy:active {
+  transform: scale(0.98);
+}
+.copy:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
